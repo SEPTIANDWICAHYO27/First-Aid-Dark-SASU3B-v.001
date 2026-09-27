@@ -1,0 +1,23 @@
+{
+  "name": "FirstAid SASU3B — Manajemen Stok P3K",
+  "short_name": "FirstAid SASU3B",
+  "description": "Pemantauan stok, masa kedaluwarsa, dan kelengkapan kotak P3K area Asam Sulfat & Utilitas 3B.",
+  "lang": "id-ID",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f0e6",
+  "theme_color": "#1d2d3d",
+  "categories": ["productivity", "utilities", "medical"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Emergency Quick-Check", "url": "./index.html#cepat" },
+    { "name": "Stok opname", "url": "./index.html#opname" },
+    { "name": "Daftar belanja", "url": "./index.html#restock" }
+  ]
+}
