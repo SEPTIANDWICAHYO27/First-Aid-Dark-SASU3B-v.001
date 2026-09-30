@@ -139,10 +139,11 @@
   var NAVY = '#1d2d3d', MUT = '#5d5d60', GARIS = '#b7b7ba', ZEBRA = '#f2f4f7', MERAH = '#b3263e';
   var M = 40, LB = PW - 2 * M;
 
-  function permintaan(d) {
-    return muatLogo(d.logoUrl).then(function (logo) {
-      var doc = new Dok(); doc.img = logo;
-      var y;
+  /** Menulis satu dokumen permintaan ke doc; dokumen berikutnya dimulai di halaman baru.
+      d.kotak terisi → dokumen per kotak (lokasi, PIC, kolom expired); kosong → gabungan (kolom kotak). */
+  function tulisDokumen(doc, d, logo, pertama) {
+      if (!pertama) doc.baru();
+      var y, perKotak = !!d.kotak;
 
       function kepala(lanjutan) {
         y = M;
@@ -150,7 +151,8 @@
         var tx = logo ? M + 54 : M;
         doc.teks(tx, y + 10, 'DOKUMEN PERMINTAAN STOK P3K', { size: 14, bold: true, color: NAVY });
         doc.teks(tx, y + 24, d.unit || 'SR Asam Sulfat & Utilitas 3B', { size: 9, color: MUT });
-        doc.teks(tx, y + 35, 'Aplikasi FirstAid SASU3B · Manajemen & inventaris stok P3K', { size: 8, color: MUT });
+        if (perKotak) doc.teks(tx, y + 36, 'KOTAK ' + d.kotak + ' · ' + (d.lokasi || ''), { size: 9, bold: true, color: MERAH });
+        else doc.teks(tx, y + 35, 'Aplikasi FirstAid SASU3B · Manajemen & inventaris stok P3K', { size: 8, color: MUT });
         doc.teks(PW - M, y + 10, 'No. ' + d.nomor, { size: 9, bold: true, align: 'right', color: NAVY });
         doc.teks(PW - M, y + 24, d.tanggal, { size: 9, align: 'right', color: MUT });
         if (lanjutan) doc.teks(PW - M, y + 35, '(lanjutan)', { size: 8, align: 'right', color: MUT });
@@ -162,7 +164,12 @@
       kepala(false);
 
       /* Blok informasi dua kolom */
-      var info = [
+      var info = perKotak ? [
+        ['Nomor dokumen', d.nomor], ['Tanggal dibuat', d.tanggal + ', ' + d.jam],
+        ['Kotak / lokasi', d.kotak + ' · ' + (d.lokasi || '-')], ['PIC kotak', d.pic || '-'],
+        ['Pemohon', d.pemohon], ['NIK / Peran', d.nik + ' / ' + d.peran],
+        ['Periode data stok', d.periode], ['Sumber data', d.sumber]
+      ] : [
         ['Nomor dokumen', d.nomor], ['Tanggal dibuat', d.tanggal + ', ' + d.jam],
         ['Pemohon', d.pemohon], ['NIK / Peran', d.nik + ' / ' + d.peran],
         ['Lingkup kotak', d.lingkup], ['Periode data stok', d.periode],
@@ -178,14 +185,15 @@
       });
       y += 4 * 16 + 8 + 14;
 
-      doc.teks(M, y, 'Dengan ini kami mengajukan permintaan pengadaan / penggantian isi kotak P3K sebagai berikut:', { size: 9 });
+      doc.teks(M, y, 'Dengan ini kami mengajukan permintaan pengadaan / penggantian isi kotak P3K' +
+        (perKotak ? ' nomor ' + d.kotak : '') + ' sebagai berikut:', { size: 9 });
       y += 10;
 
       /* Tabel barang */
       var kol = [
         { k: 'no', t: 'No', w: 22, a: 'center' },
         { k: 'nama', t: 'Nama barang', w: 150 },
-        { k: 'kotak', t: 'Kotak', w: 92 },
+        perKotak ? { k: 'exp', t: 'Expired date', w: 92 } : { k: 'kotak', t: 'Kotak', w: 92 },
         { k: 'stok', t: 'Stok', w: 36, a: 'center' },
         { k: 'ketentuan', t: 'Ketentuan', w: 50, a: 'center' },
         { k: 'diminta', t: 'Diminta', w: 46, a: 'center', b: true },
@@ -208,7 +216,7 @@
 
       var BAWAH = PH - M - 30, total = 0;
       d.rows.forEach(function (r, i) {
-        var nilai = { no: String(i + 1), nama: r.nama, kotak: r.kotak, stok: String(r.stok), ketentuan: String(r.ketentuan),
+        var nilai = { no: String(i + 1), nama: r.nama, kotak: r.kotak, exp: r.exp || '-', stok: String(r.stok), ketentuan: String(r.ketentuan),
           diminta: String(r.diminta), satuan: r.satuan || 'pcs', alasan: r.alasan };
         total += Number(r.diminta) || 0;
         var baris = {}, maxL = 1;
@@ -266,17 +274,39 @@
         doc.teks(cx, y + 69, t[2], { size: 7.5, align: 'center', color: MUT });
       });
 
-      /* Kaki tiap halaman */
-      var n = doc.hal.length;
-      doc.hal.forEach(function (pg, i) {
-        doc.cur = pg;
-        doc.garis(M, PH - M + 6, PW - M, PH - M + 6, { color: GARIS, lw: 0.4 });
-        doc.teks(M, PH - M + 17, 'Dibuat otomatis oleh FirstAid SASU3B · ' + d.dibuat, { size: 7, color: MUT });
-        doc.teks(PW - M, PH - M + 17, 'Halaman ' + (i + 1) + ' / ' + n, { size: 7, color: MUT, align: 'right' });
-      });
+  }
+
+  /** Kaki semua halaman: sumber + nomor halaman. */
+  function kaki(doc, dibuat) {
+    var n = doc.hal.length;
+    doc.hal.forEach(function (pg, i) {
+      doc.cur = pg;
+      doc.garis(M, PH - M + 6, PW - M, PH - M + 6, { color: GARIS, lw: 0.4 });
+      doc.teks(M, PH - M + 17, 'Dibuat otomatis oleh FirstAid SASU3B · ' + dibuat, { size: 7, color: MUT });
+      doc.teks(PW - M, PH - M + 17, 'Halaman ' + (i + 1) + ' / ' + n, { size: 7, color: MUT, align: 'right' });
+    });
+  }
+
+  /** Satu dokumen (per kotak atau gabungan). */
+  function permintaan(d) {
+    return muatLogo(d.logoUrl).then(function (logo) {
+      var doc = new Dok(); doc.img = logo;
+      tulisDokumen(doc, d, logo, true);
+      kaki(doc, d.dibuat);
       return doc.blob('Dokumen Permintaan Stok P3K ' + d.nomor);
     });
   }
 
-  root.FAPdf = { permintaan: permintaan, _ansi: ansi, _bungkus: bungkus };
+  /** Beberapa dokumen dalam satu PDF — satu dokumen per kotak, masing-masing mulai di halaman baru. */
+  function permintaanBanyak(list) {
+    if (!list || !list.length) return Promise.reject(new Error('tidak ada dokumen'));
+    return muatLogo(list[0].logoUrl).then(function (logo) {
+      var doc = new Dok(); doc.img = logo;
+      list.forEach(function (d, i) { tulisDokumen(doc, d, logo, i === 0); });
+      kaki(doc, list[0].dibuat);
+      return doc.blob('Dokumen Permintaan Stok P3K per kotak');
+    });
+  }
+
+  root.FAPdf = { permintaan: permintaan, permintaanBanyak: permintaanBanyak, _ansi: ansi, _bungkus: bungkus };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -82,3 +82,11 @@ Backend kini terdiri dari **dua berkas** di proyek Apps Script:
 Di editor Apps Script: **+ → Script** → beri nama `Config` → tempel isi `apps-script/Config.gs`;
 ganti isi `Code.gs` dengan `apps-script/Code.gs`. Lalu Deploy → Manage deployments → edit →
 *New version* (URL tetap). Cek URL `/exec` → `"versi":"v7.3-2026-10"`.
+
+## Pembaruan v7.4 — dokumen permintaan per kotak
+
+Menu **Dokumen** kini menampilkan kartu untuk **setiap kotak P3K** (nomor, lokasi, PIC, jumlah barang
+yang perlu diminta) dengan tombol **PDF** masing-masing. PDF per kotak memuat kop dengan nomor & lokasi
+kotak, PIC kotak, kolom *Expired date*, catatan, dan tanda tangan. Tombol **Unduh semua kotak** membuat
+satu PDF berisi dokumen tiap kotak yang perlu permintaan (setiap kotak mulai di halaman baru).
+Ketuk kartu untuk membuka rincian kotak itu dan menyesuaikan jumlah sebelum mengunduh.
