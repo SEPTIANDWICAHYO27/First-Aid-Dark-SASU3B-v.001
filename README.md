@@ -31,3 +31,26 @@ Setiap `index.html` diperbarui: unggah juga `sw.js` (versi cache sudah dinaikkan
   (Foto Kotak P3K | Update stok | Expired Date).
 
 Berkas yang harus diunggah ulang: `index.html`, `sw.js`, `config.js`, `pdfdoc.js` (baru).
+
+## Pembaruan v7.1 — update stok bulanan ke Google Sheets
+
+Tombol **Simpan ke sheet · <Bulan> <Tahun>** di layar opname menulis ke tab `Checklist P3K`:
+- **Update stok** & **Expired Date** pada kolom bulan berjalan (mis. Oktober = kolom AI & AJ),
+  untuk seluruh 22 item kotak — item yang tidak diubah ikut dicatat sebagai stok bulan itu.
+- Foto kotak → folder Drive "Foto Kotak P3K" (dibagikan via link), baris baru di tab `Foto Kotak`,
+  gambar di sel "Foto Kotak P3K" bulan itu dan di kolom B.
+- Catatan di tab `Log` (Riwayat Penggunaan).
+Bulan & tahun diambil dari jam server Google Sheets, jadi otomatis pindah kolom setiap bulan.
+
+### Memasang backend `apps-script/Code.gs`
+1. Buka spreadsheet → **Extensions → Apps Script**.
+2. Ganti isi `Code.gs` dengan berkas `apps-script/Code.gs` dari repo ini (fungsi lain milik Anda,
+   mis. pengingat, boleh tetap di berkas terpisah — asal tidak ada `doGet`/`doPost` ganda).
+3. Pilih fungsi `P3K_ujiSetup` → **Run** → izinkan akses. Lihat log: kolom bulan berjalan harus benar.
+4. **Deploy → Manage deployments** → edit deployment yang ada → Version: *New version* → Deploy
+   (URL tetap), atau **New deployment → Web app** (Execute as: *Me*, Who has access: *Anyone*).
+5. Pastikan URL `/exec` sama dengan `API_URL` di `config.js`; bila berbeda, ganti lalu unggah `config.js`.
+6. Uji: buka URL `/exec` di browser → harus tampil `{"ok":true,"app":"FirstAid SASU3B",...}`.
+
+Kiriman yang tertahan di HP (antrean) otomatis terkirim setelah login ulang begitu backend aktif.
+Januari: siapkan sheet Checklist tahun baru (judul "TAHUN 2027"); backend menolak menulis ke tahun yang salah.

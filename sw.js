@@ -1,8 +1,8 @@
 /* FirstAid SASU3B — service worker
    App shell cache-first, data Google Sheets network-first dengan fallback cache
    supaya aplikasi tetap terbaca di area plant tanpa sinyal. */
-const SHELL = 'fa-sasu3b-shell-v7';
-const DATA = 'fa-sasu3b-data-v4';
+const SHELL = 'fa-sasu3b-shell-v8';
+const DATA = 'fa-sasu3b-data-v5';
 const SHELL_FILES = [
   './', './index.html', './manifest.webmanifest', './config.js', './pdfdoc.js',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png'
