@@ -29,7 +29,14 @@ function doGet(e) {
   var a = (e && e.parameter && e.parameter.action) || '';
   if (a === 'waktu') return P3K_json({ ok: true, epoch: Date.now(), tz: P3K_ss().getSpreadsheetTimeZone() });
   if (a === 'tahun') return P3K_json({ ok: true, daftar: P3K_daftarTahun().map(function (t) { return { tahun: t.tahun, sheet: t.sheet.getName() }; }) });
-  return P3K_json({ ok: true, app: 'FirstAid SASU3B', versi: P3K.VERSI });
+  var info = { ok: true, app: 'FirstAid SASU3B', versi: P3K.VERSI };
+  try {
+    var ss = P3K_ss(), shU = ss.getSheetByName(P3K.SHEET_USER);
+    info.spreadsheet = ss.getName();
+    info.spreadsheet_id_cocok = ss.getId() === P3K.SPREADSHEET_ID;
+    info.tab_user = shU ? Math.max(0, shU.getLastRow() - 1) + ' baris' : 'TIDAK DITEMUKAN';
+  } catch (err) { info.spreadsheet = 'GAGAL DIBUKA: ' + err.message; }
+  return P3K_json(info);
 }
 
 function doPost(e) {
@@ -49,21 +56,51 @@ function doPost(e) {
 
 function P3K_auth(req) {
   var u = P3K_cariUser(String(req.nik || '').trim());
-  if (!u || String(req.sandi || '') !== u.pw) return { ok: false, error: 'NIK atau password salah.' };
+  if (!P3K_sandiCocok(u, req.sandi)) {
+    console.warn('Login ditolak NIK ' + req.nik + ': ' + (u ? 'password tidak cocok (baris ' + u.baris + ')' : 'NIK tidak ada di tab ' + P3K.SHEET_USER) +
+      ' · spreadsheet ' + P3K_ss().getName());
+    return { ok: false, error: 'NIK atau password salah (tab ' + P3K.SHEET_USER + ' di spreadsheet backend "' + P3K_ss().getName() + '").' };
+  }
   var exp = Date.now() + P3K.SESI_JAM * 3600000;
   return { ok: true, token: P3K_buatToken(u.nik, exp), nama: u.nama, peran: u.peran, berlaku_sampai: exp };
 }
 
+/** Normalisasi NIK: hanya angka (mengabaikan spasi, titik/koma pemisah ribuan, apostrof). */
+function P3K_nikBersih(x) { return String(x == null ? '' : x).replace(/\D/g, ''); }
+
+/**
+ * Cari pengguna di tab User. Kolom dikenali dari judul (Username/NIK, Password, Nama, Role);
+ * bila judul tidak ditemukan dipakai urutan bawaan No | Username | Password | Nama | Role.
+ * Password dicocokkan dengan nilai tampilan maupun nilai mentah sel (mis. sandi angka).
+ */
 function P3K_cariUser(nik) {
   var sh = P3K_ss().getSheetByName(P3K.SHEET_USER);
+  nik = P3K_nikBersih(nik);
   if (!sh || !nik) return null;
-  var v = sh.getDataRange().getDisplayValues();
-  for (var i = 0; i < v.length; i++) {
-    // Kolom: No | Username (NIK) | Password | Nama | Role
-    if (String(v[i][1]).trim() === nik)
-      return { nik: nik, pw: String(v[i][2]).trim(), nama: String(v[i][3]).trim(), peran: String(v[i][4] || 'User').trim() };
+  var rg = sh.getDataRange(), tampil = rg.getDisplayValues(), mentah = rg.getValues();
+  var kN = 1, kP = 2, kNm = 3, kR = 4;
+  for (var h = 0; h < Math.min(tampil.length, 5); h++) {
+    var row = tampil[h].map(function (x) { return String(x).toLowerCase().trim(); });
+    var iN = row.findIndex(function (x) { return /^(username|user name|nik|user)\b/.test(x); });
+    var iP = row.findIndex(function (x) { return /pass|sandi/.test(x); });
+    if (iN >= 0 && iP >= 0) {
+      kN = iN; kP = iP;
+      var iNm = row.findIndex(function (x) { return /^nama/.test(x); }); if (iNm >= 0) kNm = iNm;
+      var iR = row.findIndex(function (x) { return /^(role|peran|hak)/.test(x); }); if (iR >= 0) kR = iR;
+      break;
+    }
+  }
+  for (var i = 0; i < tampil.length; i++) {
+    if (P3K_nikBersih(tampil[i][kN]) !== nik) continue;
+    var pw = [String(tampil[i][kP]).trim(), String(mentah[i][kP]).trim()];
+    return { nik: nik, pw: pw[0], pwAlt: pw[1], nama: String(tampil[i][kNm]).trim(),
+      peran: String(tampil[i][kR] || 'User').trim() || 'User', baris: i + 1 };
   }
   return null;
+}
+function P3K_sandiCocok(u, sandi) {
+  sandi = String(sandi == null ? '' : sandi).trim();
+  return !!u && sandi !== '' && (sandi === u.pw || sandi === u.pwAlt);
 }
 
 function P3K_rahasia() {
@@ -338,11 +375,15 @@ function P3K_log(user, aksi, detail) {
   var sh = P3K_ss().getSheetByName(P3K.SHEET_LOG);
   if (sh) sh.appendRow([new Date(), user, aksi, detail]);   // Timestamp | User | Action | Details
 }
+/** Spreadsheet database: SELALU dari P3K.SPREADSHEET_ID bila diisi (bukan spreadsheet tempat skrip
+    kebetulan terikat), supaya backend membaca tab yang sama dengan aplikasi. */
 function P3K_ss() {
   if (P3K_ss._c) return P3K_ss._c;
-  var aktif = null;
-  try { aktif = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
-  P3K_ss._c = aktif || SpreadsheetApp.openById(P3K.SPREADSHEET_ID);
+  if (P3K.SPREADSHEET_ID) {
+    P3K_ss._c = SpreadsheetApp.openById(P3K.SPREADSHEET_ID);
+  } else {
+    P3K_ss._c = SpreadsheetApp.getActiveSpreadsheet();
+  }
   return P3K_ss._c;
 }
 function P3K_json(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
@@ -358,4 +399,20 @@ function P3K_ujiSetup() {
   P3K_folderFoto();
   Logger.log('Tab %s · Tahun sheet: %s · Kolom Update stok %s: %s · Expired: %s · Foto: %s',
     sh.getName(), P3K_tahunSheet(v), BULAN_ID[bln - 1], P3K_hurufKolom(r.kolomQty), P3K_hurufKolom(r.kolomExp), P3K_hurufKolom(r.kolomFoto));
+}
+
+/**
+ * DIAGNOSIS LOGIN — isi NIK & sandi di bawah, pilih fungsi ini, klik Run, lalu buka "Execution log".
+ * Menunjukkan spreadsheet yang dibaca backend, baris NIK di tab User, dan apakah sandi cocok.
+ */
+function P3K_ujiLogin() {
+  var NIK = '2146103';
+  var SANDI = 'isi-sandi-di-sini';
+  var ss = P3K_ss(), sh = ss.getSheetByName(P3K.SHEET_USER);
+  Logger.log('Spreadsheet: %s (%s) · ID cocok dengan Config: %s', ss.getName(), ss.getId(), ss.getId() === P3K.SPREADSHEET_ID);
+  Logger.log('Tab %s: %s', P3K.SHEET_USER, sh ? (sh.getLastRow() + ' baris · judul: ' + sh.getRange(1, 1, 1, Math.min(6, sh.getLastColumn())).getDisplayValues()[0].join(' | ')) : 'TIDAK DITEMUKAN');
+  var u = P3K_cariUser(NIK);
+  if (!u) { Logger.log('NIK %s TIDAK ditemukan di tab %s.', NIK, P3K.SHEET_USER); return; }
+  Logger.log('NIK %s ditemukan di baris %s · nama %s · peran %s · panjang sandi di sheet %s', NIK, u.baris, u.nama, u.peran, u.pw.length);
+  Logger.log('Sandi cocok: %s', P3K_sandiCocok(u, SANDI));
 }

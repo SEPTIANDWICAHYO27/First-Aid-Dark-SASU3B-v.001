@@ -28,7 +28,7 @@ var P3K = {
   // Mulai bulan ke berapa tab tahun berikutnya disiapkan (12 = Desember)
   BULAN_SIAPKAN_TAHUN_DEPAN: 12,
 
-  VERSI: 'v7.3-2026-10'
+  VERSI: 'v7.4-2026-10'
 };
 
 var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
