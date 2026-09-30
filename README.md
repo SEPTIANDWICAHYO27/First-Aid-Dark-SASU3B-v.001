@@ -90,3 +90,12 @@ yang perlu diminta) dengan tombol **PDF** masing-masing. PDF per kotak memuat ko
 kotak, PIC kotak, kolom *Expired date*, catatan, dan tanda tangan. Tombol **Unduh semua kotak** membuat
 satu PDF berisi dokumen tiap kotak yang perlu permintaan (setiap kotak mulai di halaman baru).
 Ketuk kartu untuk membuka rincian kotak itu dan menyesuaikan jumlah sebelum mengunduh.
+
+## Pembaruan v7.5 (aplikasi) & backend v7.4
+
+- Aplikasi: saat menyimpan opname tanpa sesi server, aplikasi login ulang ke Apps Script otomatis lalu
+  mengirim; alasan gagal ditampilkan. URL backend selalu dari `config.js`. Profil: status backend,
+  jumlah antrean, tombol **Hubungkan ulang backend & kirim antrean**.
+- Backend: selalu membaca spreadsheet `SPREADSHEET_ID` di `Config.gs`; pencocokan tab User lebih toleran
+  (kolom dari judul, NIK angka saja, sandi angka). Buka URL `/exec` untuk melihat spreadsheet yang dibaca.
+  Diagnosis login: isi NIK & sandi di fungsi `P3K_ujiLogin` → Run → lihat Execution log.
