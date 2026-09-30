@@ -15,21 +15,13 @@
  * Jalankan P3K_pasangTrigger() sekali: tiap hari pukul 01.00 backend memastikan tab tahun berjalan
  * ada, dan sejak 1 Desember menyiapkan tab tahun berikutnya.
  *
+ * Berkas: Config.gs (pengaturan) + Code.gs (logika). Keduanya harus ada di proyek Apps Script.
  * Pasang: Extensions → Apps Script pada spreadsheet → tempel berkas ini → Deploy → Manage deployments
  * → (edit deployment lama → Version: New version) atau New deployment → Web app,
  * Execute as: Me, Who has access: Anyone. Salin URL /exec ke config.js (API_URL).
  */
 
-var P3K = {
-  SHEET_CHECKLIST: 'Checklist P3K',
-  SHEET_USER: 'User',
-  SHEET_LOG: 'Log',
-  SHEET_FOTO: 'Foto Kotak',
-  FOLDER_FOTO: 'Foto Kotak P3K',   // folder Drive (dibuat otomatis bila belum ada)
-  SESI_JAM: 8,                      // masa berlaku token
-  VERSI: 'v7.2-2026-10'
-};
-var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+/* Pengaturan (nama tab, folder foto, ID spreadsheet, URL Web App) ada di Config.gs. */
 
 /* ───────────────────────── Titik masuk ───────────────────────── */
 
@@ -285,7 +277,7 @@ function P3K_otomatisTahunan() {
   lock.waitLock(30000);
   try {
     P3K_siapkanTahun(y);
-    if (m === 12) P3K_siapkanTahun(y + 1);
+    if (m >= (P3K.BULAN_SIAPKAN_TAHUN_DEPAN || 12)) P3K_siapkanTahun(y + 1);
   } finally { lock.releaseLock(); }
 }
 
@@ -294,7 +286,7 @@ function P3K_pasangTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'P3K_otomatisTahunan') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('P3K_otomatisTahunan').timeBased().everyDays(1).atHour(1).create();
+  ScriptApp.newTrigger('P3K_otomatisTahunan').timeBased().everyDays(1).atHour(P3K.JAM_TRIGGER || 1).create();
   P3K_otomatisTahunan();
   Logger.log('Trigger terpasang. Tab tahun: %s', P3K_daftarTahun().map(function (t) { return t.tahun + '=' + t.sheet.getName(); }).join(', '));
 }
@@ -346,7 +338,13 @@ function P3K_log(user, aksi, detail) {
   var sh = P3K_ss().getSheetByName(P3K.SHEET_LOG);
   if (sh) sh.appendRow([new Date(), user, aksi, detail]);   // Timestamp | User | Action | Details
 }
-function P3K_ss() { return SpreadsheetApp.getActiveSpreadsheet(); }
+function P3K_ss() {
+  if (P3K_ss._c) return P3K_ss._c;
+  var aktif = null;
+  try { aktif = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
+  P3K_ss._c = aktif || SpreadsheetApp.openById(P3K.SPREADSHEET_ID);
+  return P3K_ss._c;
+}
 function P3K_json(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function P3K_hurufKolom(n) { var s = ''; while (n > 0) { var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
 

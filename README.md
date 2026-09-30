@@ -71,3 +71,14 @@ Setelah menempel Code.gs, jalankan **sekali** fungsi `P3K_pasangTrigger` → tri
 memastikan tab tahun berjalan ada, dan sejak 1 Desember menyiapkan tab tahun berikutnya.
 Tab juga dibuat otomatis saat opname pertama di tahun baru bila trigger belum terpasang.
 Tahun lalu tidak bisa ditulis dari aplikasi (kecuali kiriman Desember yang tertunda hingga Januari).
+
+## Pembaruan v7.3 — `apps-script/Config.gs`
+
+Backend kini terdiri dari **dua berkas** di proyek Apps Script:
+- `Config.gs` — semua pengaturan: ID spreadsheet, URL Web App aktif, nama tab, folder foto Drive,
+  masa sesi, jam trigger harian, bulan mulai menyiapkan tab tahun depan.
+- `Code.gs` — logika (tidak perlu diubah).
+
+Di editor Apps Script: **+ → Script** → beri nama `Config` → tempel isi `apps-script/Config.gs`;
+ganti isi `Code.gs` dengan `apps-script/Code.gs`. Lalu Deploy → Manage deployments → edit →
+*New version* (URL tetap). Cek URL `/exec` → `"versi":"v7.3-2026-10"`.
