@@ -18,6 +18,12 @@ window.FA_CONFIG = {
     FOTO: "Foto Kotak"            // Timestamp | Kotak | Bulan | URL foto | NIK
   },
 
+  // Multi-tahun: tab tahun pertama = SHEETS.CHECKLIST ("Checklist P3K", judul TAHUN 2026);
+  // tahun berikutnya otomatis dibuat backend bernama "Checklist P3K 2027", "Checklist P3K 2028", …
+  TAHUN_AWAL: 2026,
+  // Opsional: nama tab khusus per tahun, mis. { 2027: "Checklist 2027" }. Kosongkan bila mengikuti pola.
+  SHEET_TAHUN: {},
+
   // Zona waktu tampilan jam aplikasi. Jam diambil dari server Google Sheets (UTC),
   // lalu ditampilkan pada zona ini. WIB = UTC+7 = 420 menit.
   TZ_OFFSET_MIN: 420,

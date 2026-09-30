@@ -54,3 +54,20 @@ Bulan & tahun diambil dari jam server Google Sheets, jadi otomatis pindah kolom 
 
 Kiriman yang tertahan di HP (antrean) otomatis terkirim setelah login ulang begitu backend aktif.
 Januari: siapkan sheet Checklist tahun baru (judul "TAHUN 2027"); backend menolak menulis ke tahun yang salah.
+
+## Pembaruan v7.2 — multi-tahun
+
+**Aplikasi**: baris pilihan **Tahun** di Beranda, Kotak, Riwayat, dan Dokumen. Daftar tahun dibaca
+otomatis dari spreadsheet (tahun awal s.d. tahun depan bila tab-nya sudah disiapkan).
+- Tahun berjalan: bisa diisi opname seperti biasa.
+- Tahun lalu: **arsip, hanya baca** — stok, foto per bulan, kepatuhan Jan–Des, dan dokumen PDF tetap bisa dilihat.
+- Awal tahun baru: selama kolom Januari belum diisi, stok terakhir tahun lalu dipakai sebagai angka awal,
+  lalu opname Januari menulisnya ke tab tahun baru.
+
+**Backend (`apps-script/Code.gs`)**: tab tahun baru dibuat otomatis dengan menduplikat format
+tab tahun sebelumnya (kotak, PIC, isi, ketentuan stok, format sel), mengganti judul "TAHUN", dan
+mengosongkan data bulanan. Nama tab: `Checklist P3K 2027`, `Checklist P3K 2028`, …
+Setelah menempel Code.gs, jalankan **sekali** fungsi `P3K_pasangTrigger` → trigger harian pukul 01.00:
+memastikan tab tahun berjalan ada, dan sejak 1 Desember menyiapkan tab tahun berikutnya.
+Tab juga dibuat otomatis saat opname pertama di tahun baru bila trigger belum terpasang.
+Tahun lalu tidak bisa ditulis dari aplikasi (kecuali kiriman Desember yang tertunda hingga Januari).

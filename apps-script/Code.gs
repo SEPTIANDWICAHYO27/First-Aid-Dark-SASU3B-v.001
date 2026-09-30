@@ -7,7 +7,13 @@
  *              → menulis ke kolom "Update stok" & "Expired Date" BULAN tersebut di tab Checklist P3K,
  *                menyimpan foto ke Google Drive + baris baru di tab Foto Kotak + gambar di sel foto bulan itu,
  *                dan mencatat ke tab Log (Riwayat Penggunaan).
- * GET  ?action=waktu → {ok, epoch, tz}   ·   GET tanpa parameter → status backend.
+ * GET  ?action=waktu → {ok, epoch, tz}   ·   ?action=tahun → daftar tab tahun   ·   tanpa parameter → status.
+ *
+ * Multi-tahun: tab tahun pertama bernama "Checklist P3K" (judul "... TAHUN 2026"); tahun berikutnya
+ * "Checklist P3K 2027", "Checklist P3K 2028", … dibuat OTOMATIS dengan menduplikat format tahun
+ * sebelumnya (kotak, PIC, isi, ketentuan stok, format sel) dan mengosongkan data bulanan.
+ * Jalankan P3K_pasangTrigger() sekali: tiap hari pukul 01.00 backend memastikan tab tahun berjalan
+ * ada, dan sejak 1 Desember menyiapkan tab tahun berikutnya.
  *
  * Pasang: Extensions → Apps Script pada spreadsheet → tempel berkas ini → Deploy → Manage deployments
  * → (edit deployment lama → Version: New version) atau New deployment → Web app,
@@ -21,7 +27,7 @@ var P3K = {
   SHEET_FOTO: 'Foto Kotak',
   FOLDER_FOTO: 'Foto Kotak P3K',   // folder Drive (dibuat otomatis bila belum ada)
   SESI_JAM: 8,                      // masa berlaku token
-  VERSI: 'v7-2026-10'
+  VERSI: 'v7.2-2026-10'
 };
 var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
@@ -30,6 +36,7 @@ var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustu
 function doGet(e) {
   var a = (e && e.parameter && e.parameter.action) || '';
   if (a === 'waktu') return P3K_json({ ok: true, epoch: Date.now(), tz: P3K_ss().getSpreadsheetTimeZone() });
+  if (a === 'tahun') return P3K_json({ ok: true, daftar: P3K_daftarTahun().map(function (t) { return { tahun: t.tahun, sheet: t.sheet.getName() }; }) });
   return P3K_json({ ok: true, app: 'FirstAid SASU3B', versi: P3K.VERSI });
 }
 
@@ -96,18 +103,18 @@ function P3K_checklist(req) {
   var boxId = String(req.box_id || '').trim();
   if (!/^\d{3,}$/.test(boxId)) return { ok: false, error: 'Nomor kotak tidak valid.' };
 
+  var tahunKini = Number(Utilities.formatDate(now, tz, 'yyyy'));
+  var tahun = parseInt(req.tahun, 10) || tahunKini;
+  // Hanya tahun berjalan yang boleh ditulis (kecuali kiriman Desember yang tertunda sampai Januari).
+  if (tahun !== tahunKini && !(tahun === tahunKini - 1 && bulan === 12))
+    return { ok: false, error: 'Tahun ' + tahun + ' adalah arsip — hanya tahun ' + tahunKini + ' yang dapat diperbarui.' };
+
   var lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
-    var sh = ss.getSheetByName(P3K.SHEET_CHECKLIST);
-    if (!sh) return { ok: false, error: 'Tab "' + P3K.SHEET_CHECKLIST + '" tidak ditemukan.' };
+    var sh = P3K_sheetTahun(tahun) || (tahun === tahunKini ? P3K_siapkanTahun(tahun) : null);
+    if (!sh) return { ok: false, error: 'Tab Checklist tahun ' + tahun + ' tidak ditemukan.' };
     var values = sh.getDataRange().getDisplayValues();
-
-    var tahunSheet = P3K_tahunSheet(values);
-    var tahun = parseInt(req.tahun, 10) || Number(Utilities.formatDate(now, tz, 'yyyy'));
-    if (tahunSheet && tahun !== tahunSheet)
-      return { ok: false, error: 'Sheet Checklist berisi data tahun ' + tahunSheet + ', sedangkan kiriman untuk ' + tahun +
-        '. Siapkan sheet tahun ' + tahun + ' terlebih dahulu.' };
 
     var rencana = P3K_rencanaTulis(values, boxId, bulan, req.rows || []);
     if (rencana.error) return { ok: false, error: rencana.error };
@@ -136,7 +143,7 @@ function P3K_checklist(req) {
     SpreadsheetApp.flush();
 
     return { ok: true, item_ditulis: nItem, exp_ditulis: nExp, foto: !!fotoUrl, foto_url: fotoUrl,
-      bulan: bulan, tahun: tahun, kolom_stok: P3K_hurufKolom(rencana.kolomQty), tidak_dikenal: rencana.tidakDikenal };
+      bulan: bulan, tahun: tahun, sheet: sh.getName(), kolom_stok: P3K_hurufKolom(rencana.kolomQty), tidak_dikenal: rencana.tidakDikenal };
   } finally {
     lock.releaseLock();
   }
@@ -203,6 +210,95 @@ function P3K_tahunSheet(values) {
   return 0;
 }
 
+/* ───────────────────────── Multi-tahun ───────────────────────── */
+
+/** Nama tab untuk suatu tahun: tahun pertama memakai nama dasar, berikutnya "Checklist P3K <tahun>". */
+function P3K_namaTab(tahun) { return P3K.SHEET_CHECKLIST + ' ' + tahun; }
+
+/** Semua tab Checklist beserta tahunnya (dibaca dari judul "TAHUN yyyy" di baris atas), urut naik. */
+function P3K_daftarTahun() {
+  var out = [];
+  P3K_ss().getSheets().forEach(function (sh) {
+    if (sh.getName().toLowerCase().indexOf(P3K.SHEET_CHECKLIST.toLowerCase()) !== 0) return;
+    var lc = Math.max(1, Math.min(sh.getLastColumn(), 8)), lr = Math.max(1, Math.min(sh.getLastRow(), 4));
+    var y = P3K_tahunSheet(sh.getRange(1, 1, lr, lc).getDisplayValues());
+    if (!y) { var m = /(\d{4})\s*$/.exec(sh.getName()); y = m ? Number(m[1]) : 0; }
+    if (y) out.push({ tahun: y, sheet: sh });
+  });
+  return out.sort(function (a, b) { return a.tahun - b.tahun; });
+}
+function P3K_sheetTahun(tahun) {
+  var d = P3K_daftarTahun();
+  for (var i = 0; i < d.length; i++) if (d[i].tahun === tahun) return d[i].sheet;
+  return null;
+}
+
+/**
+ * Menduplikat format tab Checklist tahun terakhir menjadi tab tahun baru:
+ * struktur kotak, PIC, isi kotak, ketentuan stok, lebar kolom, warna & format sel ikut tersalin;
+ * judul "TAHUN" diganti; semua data bulanan (foto, update stok, expired date) dan kolom B dikosongkan.
+ */
+function P3K_siapkanTahun(tahun) {
+  var ss = P3K_ss(), ada = P3K_sheetTahun(tahun);
+  if (ada) return ada;
+  var daftar = P3K_daftarTahun().filter(function (t) { return t.tahun < tahun; });
+  if (!daftar.length) throw new Error('Tidak ada tab Checklist sebelumnya untuk dijadikan format tahun ' + tahun + '.');
+  var sumber = daftar[daftar.length - 1].sheet;
+
+  var nama = P3K_namaTab(tahun);
+  if (ss.getSheetByName(nama)) throw new Error('Tab "' + nama + '" sudah ada tetapi judulnya bukan TAHUN ' + tahun + '.');
+  var baru = sumber.copyTo(ss).setName(nama);
+  ss.setActiveSheet(baru);
+  ss.moveActiveSheet(sumber.getIndex() + 1);
+
+  // Judul tahun di baris atas
+  var lc = baru.getLastColumn(), atas = baru.getRange(1, 1, 3, lc);
+  var f = atas.getFormulas(), v = atas.getValues();
+  for (var r = 0; r < 3; r++) for (var c = 0; c < lc; c++) {
+    if (!f[r][c] && typeof v[r][c] === 'string' && /tahun\s+\d{4}/i.test(v[r][c]))
+      baru.getRange(r + 1, c + 1).setValue(v[r][c].replace(/(tahun\s+)\d{4}/ig, '$1' + tahun));
+  }
+
+  // Kosongkan data bulanan: dari baris kotak pertama sampai akhir, kolom G ke kanan + kolom B.
+  var vals = baru.getDataRange().getDisplayValues(), r0 = 0;
+  for (var i = 0; i < vals.length; i++) if (/^\d{3,}/.test(String(vals[i][2]).trim())) { r0 = i + 1; break; }
+  if (r0) {
+    var n = baru.getLastRow() - r0 + 1;
+    if (lc >= 7) baru.getRange(r0, 7, n, lc - 6).clearContent();
+    baru.getRange(r0, 2, n, 1).clearContent();
+    try {  // gambar yang melayang di atas sel data ikut dibersihkan
+      baru.getImages().forEach(function (img) {
+        var a = img.getAnchorCell();
+        if (a.getRow() >= r0 && (a.getColumn() >= 7 || a.getColumn() === 2)) img.remove();
+      });
+    } catch (e) {}
+  }
+  P3K_log('Sistem', 'Siapkan tahun', 'Tab "' + nama + '" dibuat dari format "' + sumber.getName() + '" — data bulanan dikosongkan');
+  return baru;
+}
+
+/** Dijalankan trigger harian: pastikan tab tahun berjalan ada; sejak Desember siapkan tahun berikutnya. */
+function P3K_otomatisTahunan() {
+  var tz = P3K_ss().getSpreadsheetTimeZone(), now = new Date();
+  var y = Number(Utilities.formatDate(now, tz, 'yyyy')), m = Number(Utilities.formatDate(now, tz, 'M'));
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    P3K_siapkanTahun(y);
+    if (m === 12) P3K_siapkanTahun(y + 1);
+  } finally { lock.releaseLock(); }
+}
+
+/** Jalankan SEKALI dari editor: memasang trigger harian P3K_otomatisTahunan (pukul 01.00). */
+function P3K_pasangTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'P3K_otomatisTahunan') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('P3K_otomatisTahunan').timeBased().everyDays(1).atHour(1).create();
+  P3K_otomatisTahunan();
+  Logger.log('Trigger terpasang. Tab tahun: %s', P3K_daftarTahun().map(function (t) { return t.tahun + '=' + t.sheet.getName(); }).join(', '));
+}
+
 /* ───────────────────────── Foto ───────────────────────── */
 
 function P3K_simpanFoto(dataUrl, boxId, bulan, tahun, user, now) {
@@ -256,11 +352,12 @@ function P3K_hurufKolom(n) { var s = ''; while (n > 0) { var m = (n - 1) % 26; s
 
 /** Jalankan sekali dari editor untuk memberi izin Drive/Sheets dan mengecek kolom bulan berjalan. */
 function P3K_ujiSetup() {
-  var sh = P3K_ss().getSheetByName(P3K.SHEET_CHECKLIST);
+  var y = Number(Utilities.formatDate(new Date(), P3K_ss().getSpreadsheetTimeZone(), 'yyyy'));
+  var sh = P3K_sheetTahun(y) || P3K_siapkanTahun(y);
   var v = sh.getDataRange().getDisplayValues();
   var bln = Number(Utilities.formatDate(new Date(), P3K_ss().getSpreadsheetTimeZone(), 'M'));
   var r = P3K_rencanaTulis(v, '459', bln, []);
   P3K_folderFoto();
-  Logger.log('Tahun sheet: %s · Kolom Update stok %s: %s · Expired: %s · Foto: %s',
-    P3K_tahunSheet(v), BULAN_ID[bln - 1], P3K_hurufKolom(r.kolomQty), P3K_hurufKolom(r.kolomExp), P3K_hurufKolom(r.kolomFoto));
+  Logger.log('Tab %s · Tahun sheet: %s · Kolom Update stok %s: %s · Expired: %s · Foto: %s',
+    sh.getName(), P3K_tahunSheet(v), BULAN_ID[bln - 1], P3K_hurufKolom(r.kolomQty), P3K_hurufKolom(r.kolomExp), P3K_hurufKolom(r.kolomFoto));
 }
