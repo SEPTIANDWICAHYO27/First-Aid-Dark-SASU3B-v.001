@@ -1,10 +1,10 @@
 /* FirstAid SASU3B — service worker
    App shell cache-first, data Google Sheets network-first dengan fallback cache
    supaya aplikasi tetap terbaca di area plant tanpa sinyal. */
-const SHELL = 'fa-sasu3b-shell-v6';
-const DATA = 'fa-sasu3b-data-v3';
+const SHELL = 'fa-sasu3b-shell-v7';
+const DATA = 'fa-sasu3b-data-v4';
 const SHELL_FILES = [
-  './', './index.html', './manifest.webmanifest', './config.js',
+  './', './index.html', './manifest.webmanifest', './config.js', './pdfdoc.js',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png'
 ];
 
@@ -26,12 +26,20 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || !req.url.startsWith('http')) return;
 
-  // Data dari Apps Script / Sheets: network-first, jatuh ke cache saat offline.
-  if (req.url.includes('script.google.com') || req.url.includes('/api/')) {
+  // Jam server (select now()) tidak boleh dilayani dari cache — biarkan lewat langsung.
+  if (req.url.includes('docs.google.com') && /now\(\)|now%28%29/i.test(decodeURIComponent(req.url) + req.url)) return;
+
+  // Foto Google Drive: biarkan cache HTTP browser yang menangani.
+  if (req.url.includes('drive.google.com') || req.url.includes('googleusercontent.com')) return;
+
+  // Data dari Apps Script / Google Sheets (gviz): network-first, jatuh ke cache saat offline.
+  if (req.url.includes('script.google.com') || req.url.includes('docs.google.com') || req.url.includes('/api/')) {
     e.respondWith(
       fetch(req).then(res => {
-        const copy = res.clone();
-        caches.open(DATA).then(c => c.put(req, copy));
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(DATA).then(c => c.put(req, copy));
+        }
         return res;
       }).catch(() => caches.match(req))
     );

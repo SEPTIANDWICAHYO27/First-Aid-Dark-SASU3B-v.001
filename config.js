@@ -15,8 +15,13 @@ window.FA_CONFIG = {
     LOG: "Log",                   // judul isi: Riwayat Penggunaan
     APPROVALS: "Approvals",
     PURCHASE: "Purchase",
-    FOTO: "Foto Kotak"
+    FOTO: "Foto Kotak"            // Timestamp | Kotak | Bulan | URL foto | NIK
   },
+
+  // Zona waktu tampilan jam aplikasi. Jam diambil dari server Google Sheets (UTC),
+  // lalu ditampilkan pada zona ini. WIB = UTC+7 = 420 menit.
+  TZ_OFFSET_MIN: 420,
+  TZ_LABEL: "WIB",
 
   // gid tab tertentu (dipakai bila nama tab tidak bisa dirujuk langsung)
   GID: {
