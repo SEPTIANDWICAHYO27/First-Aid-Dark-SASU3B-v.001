@@ -1,3 +1,20 @@
+# FirstAid SASU3B — aplikasi stok kotak P3K
+
+## 📲 Pasang sebagai aplikasi (Android, iPhone, komputer)
+
+Bagikan link ini ke tim: **https://septiandwicahyo27.github.io/First-Aid-Dark-SASU3B-v.001/pasang.html**
+
+| Perangkat | Cara pasang |
+|---|---|
+| **Android** (Chrome) | Buka link → ketuk **Pasang aplikasi** → **Instal**. Atau menu ⋮ → *Instal aplikasi*. |
+| **iPhone / iPad** (Safari) | Buka link di **Safari** → tombol **Bagikan** → **Tambahkan ke Layar Utama** → **Tambah**. |
+| **Windows / Mac** (Chrome / Edge) | Buka link → **Pasang aplikasi**, atau ikon pasang di bilah alamat. |
+
+Setelah terpasang, ikon **FirstAid SASU3B** ada di layar utama: terbuka layar penuh tanpa bilah browser,
+tetap bisa dibaca offline, dan pembaruan dari repo ini masuk otomatis (tanpa unduh ulang).
+Tombol **Cara pasang aplikasi di HP** juga ada di layar login dan Profil.
+Pintasan (tekan lama ikon di Android): *Stok opname*, *Dokumen permintaan*, *Daftar belanja*.
+
 # FirstAid SASU3B — PWA
 
 Isi folder ini diunggah apa adanya ke root repository GitHub.

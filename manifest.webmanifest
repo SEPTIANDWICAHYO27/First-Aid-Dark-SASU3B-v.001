@@ -1,23 +1,32 @@
 {
+  "id": "./index.html",
   "name": "FirstAid SASU3B — Manajemen Stok P3K",
   "short_name": "FirstAid SASU3B",
-  "description": "Pemantauan stok, masa kedaluwarsa, dan kelengkapan kotak P3K area Asam Sulfat & Utilitas 3B.",
+  "description": "Pemantauan stok, masa kedaluwarsa, foto, dan dokumen permintaan kotak P3K area SR Asam Sulfat & Utilitas 3B.",
   "lang": "id-ID",
+  "dir": "ltr",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
-  "background_color": "#f4f0e6",
-  "theme_color": "#1d2d3d",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
   "categories": ["productivity", "utilities", "medical"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ],
+  "screenshots": [
+    { "src": "screenshots/beranda.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Beranda: jam server dan status checklist bulan berjalan" },
+    { "src": "screenshots/kotak.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Kotak P3K: foto per bulan dan isi kotak" },
+    { "src": "screenshots/dokumen.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Dokumen permintaan stok per kotak (PDF)" }
   ],
   "shortcuts": [
-    { "name": "Emergency Quick-Check", "url": "./index.html#cepat" },
-    { "name": "Stok opname", "url": "./index.html#opname" },
-    { "name": "Daftar belanja", "url": "./index.html#restock" }
+    { "name": "Stok opname", "url": "./index.html#opname", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Dokumen permintaan", "url": "./index.html#dokumen", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Daftar belanja", "url": "./index.html#restock", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }

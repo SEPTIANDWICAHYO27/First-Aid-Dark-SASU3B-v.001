@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pasang FirstAid SASU3B</title>
+<meta name="description" content="Pasang aplikasi FirstAid SASU3B (stok kotak P3K SR Asam Sulfat & Utilitas 3B) di layar utama Android, iPhone, atau komputer.">
+<meta name="theme-color" content="#0d0f12">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FirstAid SASU3B">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f12; --panel: #16191e; --line: rgba(236,238,242,.14); --ink: #eceef2; --mut: #98a0ad;
+    --acc: #5980a6; --acc2: #8fb2d6; --gold: #c9a892; --ok: #4f9d84; --crit: #e0637f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body { font: 15px/1.55 "Barlow", system-ui, -apple-system, sans-serif; min-height: 100vh;
+    background-image: linear-gradient(rgba(143,178,214,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(143,178,214,.05) 1px, transparent 1px);
+    background-size: 24px 24px; }
+  .k { font-family: "Barlow Condensed", system-ui, sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; }
+  main { max-width: 460px; margin: 0 auto; padding: max(28px, env(safe-area-inset-top)) 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+  .hero { display: flex; gap: 16px; align-items: center; }
+  .hero img { width: 84px; height: 84px; border-radius: 20px; flex: none; box-shadow: 0 8px 24px rgba(0,0,0,.45); background: #f4f0e6; }
+  .hero h1 { font: 700 30px/1.02 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .02em; text-transform: uppercase; }
+  .hero p { color: var(--mut); font-size: 13px; margin-top: 4px; }
+  .eyebrow { font-size: 10.5px; color: var(--gold); }
+  .card { border: 1px solid var(--line); background: var(--panel); padding: 14px; }
+  .status { display: flex; gap: 10px; align-items: flex-start; }
+  .dot { width: 8px; height: 8px; flex: none; margin-top: 7px; background: var(--acc2); }
+  .status b { display: block; font-weight: 600; }
+  .status span { color: var(--mut); font-size: 13px; }
+  button, .btn { appearance: none; border: 0; cursor: pointer; font: 600 13px "Barlow Condensed", system-ui, sans-serif;
+    letter-spacing: .14em; text-transform: uppercase; padding: 15px 14px; width: 100%; display: flex; align-items: center;
+    justify-content: center; gap: 10px; text-decoration: none; }
+  .primary { background: var(--acc); color: #fff; }
+  .primary:active { background: #416180; }
+  .ghost { background: transparent; color: var(--ink); border: 1px solid rgba(236,238,242,.24); }
+  .gold { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+  .tabs { display: flex; }
+  .tabs button { flex: 1; padding: 10px 6px; font-size: 11.5px; border: 1px solid rgba(236,238,242,.2); background: transparent; color: var(--ink); }
+  .tabs button[aria-selected="true"] { background: var(--acc); border-color: var(--acc); color: #fff; }
+  ol { list-style: none; display: flex; flex-direction: column; gap: 2px; counter-reset: s; }
+  ol li { counter-increment: s; display: grid; grid-template-columns: 18px 1fr auto; gap: 12px; align-items: start; padding: 11px 0; border-bottom: 1px solid rgba(236,238,242,.08); }
+  ol li:last-child { border-bottom: 0; }
+  ol li::before { content: counter(s); font: 700 18px/1 "Barlow Condensed", system-ui, sans-serif; color: var(--acc2); width: 18px; flex: none; padding-top: 2px; }
+  ol li svg { opacity: .85; margin-top: 2px; }
+  ol li > span { min-width: 0; }
+  .note { font-size: 12.5px; color: var(--mut); }
+  .warn { border-color: rgba(216,165,74,.55); background: rgba(216,165,74,.08); }
+  .warn b { color: #d8a54a; }
+  .hidden { display: none !important; }
+  .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .feat div { border: 1px solid var(--line); padding: 10px; font-size: 12.5px; color: var(--mut); }
+  .feat b { display: block; color: var(--ink); font-weight: 600; font-size: 13px; }
+  footer { color: #7e8794; font-size: 11.5px; text-align: center; }
+  footer a { color: var(--acc2); }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <img src="./icon-192.png" alt="Ikon FirstAid SASU3B">
+    <div>
+      <div class="k eyebrow">Aplikasi stok kotak P3K</div>
+      <h1>FirstAid<br>SASU3B</h1>
+      <p>SR Asam Sulfat &amp; Utilitas 3B</p>
+    </div>
+  </section>
+
+  <div class="card status" id="statusCard">
+    <span class="dot" id="statusDot"></span>
+    <div><b id="statusJudul">Memeriksa perangkat…</b><span id="statusKet"></span></div>
+  </div>
+
+  <div class="card warn hidden" id="inApp">
+    <b>Buka di browser utama dulu</b>
+    <p class="note" style="margin-top:4px">Halaman ini terbuka di dalam aplikasi lain (mis. WhatsApp). Ketuk menu ⋮ / ikon kompas lalu pilih
+      “Buka di Chrome” (Android) atau “Buka di Safari” (iPhone), atau salin link di bawah.</p>
+  </div>
+
+  <button class="primary hidden" id="btnInstal" type="button">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg>
+    Pasang aplikasi
+  </button>
+  <a class="btn primary hidden" id="btnBuka" href="./index.html">Buka aplikasi</a>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-os="android">Android</button>
+    <button type="button" role="tab" data-os="ios">iPhone / iPad</button>
+    <button type="button" role="tab" data-os="pc">Komputer</button>
+  </div>
+
+  <div class="card" data-panel="android">
+    <div class="k" style="font-size:11px;color:var(--acc2);margin-bottom:4px">Android · Google Chrome</div>
+    <ol>
+      <li><span>Buka halaman ini di <b>Google Chrome</b>.</span></li>
+      <li><span>Ketuk tombol <b>Pasang aplikasi</b> di atas — atau menu <b>⋮</b> di kanan atas.</span><svg width="20" height="20" viewBox="0 0 24 24" fill="#eceef2"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></li>
+      <li><span>Pilih <b>Instal aplikasi</b> / <b>Tambahkan ke layar utama</b>, lalu <b>Instal</b>.</span></li>
+      <li><span>Ikon <b>FirstAid SASU3B</b> muncul di layar utama &amp; laci aplikasi.</span></li>
+    </ol>
+  </div>
+
+  <div class="card hidden" data-panel="ios">
+    <div class="k" style="font-size:11px;color:var(--acc2);margin-bottom:4px">iPhone / iPad · Safari</div>
+    <ol>
+      <li><span>Buka halaman ini di <b>Safari</b> (bukan Chrome atau WhatsApp).</span></li>
+      <li><span>Ketuk tombol <b>Bagikan</b> di bilah bawah.</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#eceef2" stroke-width="1.7"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/></svg></li>
+      <li><span>Gulir, pilih <b>Tambahkan ke Layar Utama</b>.</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#eceef2" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg></li>
+      <li><span>Ketuk <b>Tambah</b> — ikon <b>FirstAid SASU3B</b> muncul di layar utama.</span></li>
+    </ol>
+  </div>
+
+  <div class="card hidden" data-panel="pc">
+    <div class="k" style="font-size:11px;color:var(--acc2);margin-bottom:4px">Windows / Mac · Chrome atau Edge</div>
+    <ol>
+      <li><span>Buka halaman ini di <b>Chrome</b> atau <b>Edge</b>.</span></li>
+      <li><span>Klik tombol <b>Pasang aplikasi</b> di atas, atau ikon pasang di ujung kanan bilah alamat.</span></li>
+      <li><span>Klik <b>Instal</b> — aplikasi terbuka di jendela sendiri dan ada di menu Start / Launchpad.</span></li>
+    </ol>
+  </div>
+
+  <div class="feat">
+    <div><b>Ikon sendiri</b>Layar penuh tanpa bilah browser.</div>
+    <div><b>Jalan offline</b>Data terakhir tetap terbaca di area plant.</div>
+    <div><b>Selalu terbaru</b>Pembaruan masuk otomatis, tanpa unduh ulang.</div>
+    <div><b>Ringan</b>± 3 MB, tanpa Play Store / App Store.</div>
+  </div>
+
+  <button class="gold" id="btnBagikan" type="button">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c9a892" stroke-width="1.7"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+    <span id="lblBagikan">Bagikan link pemasangan</span>
+  </button>
+
+  <footer>
+    <p id="linkApp"></p>
+    <p style="margin-top:6px"><a href="./index.html">Buka aplikasi di browser</a></p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var ua = navigator.userAgent || '';
+  var ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var android = /android/i.test(ua);
+  var inApp = /FBAN|FBAV|Instagram|Line\/|WhatsApp|; wv\)|GSA\//i.test(ua);
+  var iosNonSafari = ios && /CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  var url = new URL('./index.html', location.href).href;
+  var pasangUrl = location.href.split('#')[0];
+  var deferred = null;
+
+  $('linkApp').textContent = url;
+
+  // Service worker: syarat Chrome menawarkan pemasangan.
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {});
+  }
+
+  function pilih(os) {
+    document.querySelectorAll('[data-os]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.os === os)); });
+    document.querySelectorAll('[data-panel]').forEach(function (p) { p.classList.toggle('hidden', p.dataset.panel !== os); });
+  }
+  document.querySelectorAll('[data-os]').forEach(function (b) { b.addEventListener('click', function () { pilih(b.dataset.os); }); });
+  pilih(ios ? 'ios' : android ? 'android' : 'pc');
+
+  function status(judul, ket, warna) {
+    $('statusJudul').textContent = judul; $('statusKet').textContent = ket || '';
+    $('statusDot').style.background = warna || 'var(--acc2)';
+  }
+
+  if (standalone) {
+    status('Aplikasi sudah terpasang', 'Anda membuka halaman ini dari ikon aplikasi.', 'var(--ok)');
+    $('btnBuka').classList.remove('hidden');
+  } else if (inApp) {
+    $('inApp').classList.remove('hidden');
+    status('Browser dalam aplikasi terdeteksi', 'Pemasangan hanya bisa dari Chrome (Android) atau Safari (iPhone).', '#d8a54a');
+  } else if (iosNonSafari) {
+    status('Buka di Safari', 'Di iPhone / iPad, pemasangan ke layar utama paling andal lewat Safari.', '#d8a54a');
+  } else if (ios) {
+    status('iPhone / iPad terdeteksi', 'Ikuti 4 langkah Safari di bawah (± 20 detik).');
+  } else {
+    status(android ? 'Android terdeteksi' : 'Komputer terdeteksi', 'Menunggu tawaran pemasangan dari browser…');
+    $('btnBuka').classList.remove('hidden');
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); deferred = e;
+    $('btnInstal').classList.remove('hidden');
+    $('btnBuka').classList.add('hidden');
+    status('Siap dipasang', 'Ketuk “Pasang aplikasi”, lalu “Instal”.', 'var(--ok)');
+  });
+  $('btnInstal').addEventListener('click', function () {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function (c) {
+      deferred = null; $('btnInstal').classList.add('hidden');
+      if (c.outcome === 'accepted') status('Memasang…', 'Ikon FirstAid SASU3B akan muncul di layar utama.', 'var(--ok)');
+      else { status('Pemasangan dibatalkan', 'Bisa dicoba lagi lewat menu ⋮ → Instal aplikasi.', '#d8a54a'); $('btnBuka').classList.remove('hidden'); }
+    });
+  });
+  window.addEventListener('appinstalled', function () {
+    status('Aplikasi terpasang', 'Buka FirstAid SASU3B dari layar utama.', 'var(--ok)');
+    $('btnInstal').classList.add('hidden'); $('btnBuka').classList.remove('hidden');
+  });
+
+  $('btnBagikan').addEventListener('click', function () {
+    var data = { title: 'FirstAid SASU3B', text: 'Pasang aplikasi stok kotak P3K SASU3B:', url: pasangUrl };
+    if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+    var done = function () { $('lblBagikan').textContent = 'Link disalin'; setTimeout(function () { $('lblBagikan').textContent = 'Bagikan link pemasangan'; }, 2000); };
+    if (navigator.clipboard) navigator.clipboard.writeText(pasangUrl).then(done, function () { prompt('Salin link:', pasangUrl); });
+    else prompt('Salin link:', pasangUrl);
+  });
+})();
+</script>
+</body>
+</html>
