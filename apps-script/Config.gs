@@ -16,6 +16,7 @@ var P3K = {
   SHEET_USER: 'User',                 // No | Username (NIK) | Password | Nama | Role
   SHEET_LOG: 'Log',                   // Timestamp | User | Action | Details
   SHEET_FOTO: 'Foto Kotak',           // Timestamp | Kotak | Bulan | URL foto | NIK
+  SHEET_APPROVAL: 'Approvals',        // pengajuan update stok untuk ditinjau Admin & Approver
 
   // Folder Google Drive penyimpan foto kotak (dibuat otomatis bila belum ada)
   FOLDER_FOTO: 'Foto Kotak P3K',
@@ -28,7 +29,10 @@ var P3K = {
   // Mulai bulan ke berapa tab tahun berikutnya disiapkan (12 = Desember)
   BULAN_SIAPKAN_TAHUN_DEPAN: 12,
 
-  VERSI: 'v7.4-2026-10'
+  // Peran yang boleh meninjau pengajuan (kolom Role tab User, tidak peka huruf besar/kecil)
+  PERAN_APPROVER: ['Admin', 'Approver'],
+
+  VERSI: 'v7.6-2026-10'
 };
 
 var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];

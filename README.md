@@ -116,3 +116,20 @@ Ketuk kartu untuk membuka rincian kotak itu dan menyesuaikan jumlah sebelum meng
 - Backend: selalu membaca spreadsheet `SPREADSHEET_ID` di `Config.gs`; pencocokan tab User lebih toleran
   (kolom dari judul, NIK angka saja, sandi angka). Buka URL `/exec` untuk melihat spreadsheet yang dibaca.
   Diagnosis login: isi NIK & sandi di fungsi `P3K_ujiLogin` → Run → lihat Execution log.
+
+## Pembaruan v7.6 — Approval untuk Admin & Approver
+
+- Menu **Approval** di Beranda hanya muncul untuk peran **Admin** dan **Approver** (kolom Role tab `User`),
+  dan hanya saat ada pengajuan update stok yang **menunggu tinjauan**. Peran *User* tidak pernah melihatnya.
+- Setiap kali PIC menekan **Simpan ke sheet**, stok tetap langsung ditulis ke Checklist seperti biasa, lalu
+  backend mencatat pengajuan di tab baru **`Approvals`** (dibuat otomatis): ID, waktu, kotak, bulan, pengaju,
+  rincian perubahan (lama → baru), foto, status *Menunggu*.
+- Admin & Approver meninjau: **Setujui**, **Tolak** (alasan wajib — tanda bagi PIC untuk mengirim koreksi),
+  atau **Batalkan** keputusan. Peran dicek ulang di server. Keputusan tercatat di tab `Approvals` dan `Log`.
+- Pengajuan yang menunggu juga muncul di **Notifikasi** Admin & Approver.
+- Layar *Update kadaluwarsa* kini benar-benar mengirim ke sheet (sebelumnya hanya pemberitahuan).
+- Data contoh approval (APV-0912 dst.) dihapus.
+
+Unggah ulang: `index.html`, `sw.js`. Backend: ganti `apps-script/Code.gs` **dan** `apps-script/Config.gs`
+(ada `SHEET_APPROVAL` & `PERAN_APPROVER` baru) → Deploy → Manage deployments → edit → *New version*.
+Cek URL `/exec` → `"versi":"v7.6-2026-10"`.

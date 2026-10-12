@@ -7,6 +7,8 @@
  *              → menulis ke kolom "Update stok" & "Expired Date" BULAN tersebut di tab Checklist P3K,
  *                menyimpan foto ke Google Drive + baris baru di tab Foto Kotak + gambar di sel foto bulan itu,
  *                dan mencatat ke tab Log (Riwayat Penggunaan).
+ *              Setiap kiriman juga dicatat di tab Approvals berstatus "Menunggu" untuk ditinjau.
+ *   putuskan   {token, id, status:'Disetujui'|'Ditolak'|'Menunggu', alasan} → khusus Admin & Approver.
  * GET  ?action=waktu → {ok, epoch, tz}   ·   ?action=tahun → daftar tab tahun   ·   tanpa parameter → status.
  *
  * Multi-tahun: tab tahun pertama bernama "Checklist P3K" (judul "... TAHUN 2026"); tahun berikutnya
@@ -46,6 +48,7 @@ function doPost(e) {
   try {
     if (req.action === 'auth') return P3K_json(P3K_auth(req));
     if (req.action === 'checklist') return P3K_json(P3K_checklist(req));
+    if (req.action === 'putuskan') return P3K_json(P3K_putuskan(req));
     return P3K_json({ ok: false, error: 'Aksi tidak dikenal: ' + req.action });
   } catch (err) {
     return P3K_json({ ok: false, error: String(err && err.message || err) });
@@ -148,6 +151,14 @@ function P3K_checklist(req) {
     var rencana = P3K_rencanaTulis(values, boxId, bulan, req.rows || []);
     if (rencana.error) return { ok: false, error: rencana.error };
 
+    // Nilai sebelum ditulis — untuk rincian pengajuan (lama → baru)
+    var rincian = [];
+    rencana.tulis.forEach(function (t) {
+      var lama = String((values[t.baris - 1] || [])[t.kolom - 1] || '').trim();
+      var baru = t.jenis === 'exp' ? P3K_tglTampil(t.nilai) : String(t.nilai);
+      if (lama !== baru) rincian.push({ n: String((values[t.baris - 1] || [])[4] || '').trim(), j: t.jenis, l: lama, b: baru });
+    });
+
     rencana.tulis.forEach(function (t) {
       var sel = sh.getRange(t.baris, t.kolom);
       if (t.jenis === 'exp') {
@@ -169,9 +180,15 @@ function P3K_checklist(req) {
     P3K_log(user.nik + ' · ' + user.nama, 'Update stok',
       'Kotak ' + boxId + ' · ' + BULAN_ID[bulan - 1] + ' ' + tahun + ' · ' + nItem + ' jumlah stok, ' + nExp +
       ' expired date' + (fotoUrl ? ' + foto' : '') + (rencana.tidakDikenal.length ? ' · item tak dikenal: ' + rencana.tidakDikenal.join(', ') : ''));
+    var apvId = '';
+    try {
+      apvId = P3K_catatPengajuan({ jenis: 'Update stok', kotak: boxId, bulan: bulan, tahun: tahun, user: user, now: now,
+        ringkasan: 'Kotak ' + boxId + ' · ' + BULAN_ID[bulan - 1] + ' ' + tahun + ' · ' + rincian.length + ' perubahan' + (fotoUrl ? ' + foto' : ''),
+        rincian: rincian, foto: fotoUrl });
+    } catch (e) { console.warn('Gagal mencatat pengajuan: ' + e.message); }   // stok tetap tersimpan
     SpreadsheetApp.flush();
 
-    return { ok: true, item_ditulis: nItem, exp_ditulis: nExp, foto: !!fotoUrl, foto_url: fotoUrl,
+    return { ok: true, apv_id: apvId, perubahan: rincian.length, item_ditulis: nItem, exp_ditulis: nExp, foto: !!fotoUrl, foto_url: fotoUrl,
       bulan: bulan, tahun: tahun, sheet: sh.getName(), kolom_stok: P3K_hurufKolom(rencana.kolomQty), tidak_dikenal: rencana.tidakDikenal };
   } finally {
     lock.releaseLock();
@@ -238,6 +255,85 @@ function P3K_tahunSheet(values) {
   }
   return 0;
 }
+
+/* ───────────────────────── Approval (tinjauan pengajuan stok) ─────────────────────────
+ * Stok sudah ditulis ke Checklist saat dikirim; tab Approvals mencatat setiap kiriman agar
+ * Admin & Approver meninjaunya. Ditolak = tanda bagi PIC untuk mengirim koreksi (data tidak dibatalkan).
+ */
+var P3K_KOLOM_APV = ['ID', 'Waktu', 'Jenis', 'Kotak', 'Bulan', 'Tahun', 'NIK Pengaju', 'Nama Pengaju', 'Ringkasan',
+  'Rincian', 'Foto', 'Status', 'NIK Penyetuju', 'Nama Penyetuju', 'Waktu Putusan', 'Alasan'];
+
+/** Tab Approvals beserta peta kolom (dibuat / dilengkapi otomatis). */
+function P3K_tabApproval() {
+  var ss = P3K_ss(), nama = P3K.SHEET_APPROVAL || 'Approvals';
+  var sh = ss.getSheetByName(nama) || ss.insertSheet(nama);
+  if (sh.getLastRow() === 0) {
+    sh.getRange(1, 1, 1, P3K_KOLOM_APV.length).setValues([P3K_KOLOM_APV]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+  var judul = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map(function (x) { return String(x).trim().toLowerCase(); });
+  var kol = {};
+  P3K_KOLOM_APV.forEach(function (k) {
+    var i = judul.indexOf(k.toLowerCase());
+    if (i < 0) { i = judul.length; judul.push(k.toLowerCase()); sh.getRange(1, i + 1).setValue(k).setFontWeight('bold'); }
+    kol[k] = i + 1;
+  });
+  return { sh: sh, kol: kol, lebar: judul.length };
+}
+
+function P3K_catatPengajuan(p) {
+  var t = P3K_tabApproval(), tz = P3K_ss().getSpreadsheetTimeZone();
+  var id = 'APV-' + Utilities.formatDate(p.now, tz, 'yyMMdd-HHmmss') + '-' + p.kotak;
+  var baris = new Array(t.lebar).fill('');
+  var isi = { 'ID': id, 'Waktu': p.now, 'Jenis': p.jenis, 'Kotak': p.kotak, 'Bulan': p.bulan, 'Tahun': p.tahun,
+    'NIK Pengaju': "'" + p.user.nik, 'Nama Pengaju': p.user.nama, 'Ringkasan': p.ringkasan,
+    'Rincian': JSON.stringify(p.rincian || []), 'Foto': p.foto || '', 'Status': 'Menunggu' };
+  Object.keys(isi).forEach(function (k) { baris[t.kol[k] - 1] = isi[k]; });
+  t.sh.appendRow(baris);
+  t.sh.getRange(t.sh.getLastRow(), t.kol['Waktu']).setNumberFormat('dd/mm/yyyy HH:mm');
+  return id;
+}
+
+function P3K_bolehMenyetujui(user) {
+  var daftar = (P3K.PERAN_APPROVER || ['Admin', 'Approver']).map(function (x) { return String(x).toLowerCase(); });
+  return !!user && daftar.indexOf(String(user.peran || '').trim().toLowerCase()) >= 0;
+}
+
+/** {token, id, status:'Disetujui'|'Ditolak'|'Menunggu', alasan} */
+function P3K_putuskan(req) {
+  var user = P3K_cekToken(req.token);
+  if (!user) return { ok: false, error: 'Sesi server berakhir — masuk ulang di aplikasi.' };
+  if (!P3K_bolehMenyetujui(user)) return { ok: false, error: 'Hanya Admin & Approver yang dapat meninjau pengajuan.' };
+  var status = String(req.status || '');
+  if (['Disetujui', 'Ditolak', 'Menunggu'].indexOf(status) < 0) return { ok: false, error: 'Status tidak valid.' };
+  var alasan = String(req.alasan || '').trim();
+  if (status === 'Ditolak' && !alasan) return { ok: false, error: 'Alasan penolakan wajib diisi.' };
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var t = P3K_tabApproval(), n = t.sh.getLastRow();
+    if (n < 2) return { ok: false, error: 'Pengajuan tidak ditemukan.' };
+    var ids = t.sh.getRange(2, t.kol['ID'], n - 1, 1).getDisplayValues();
+    var r = -1;
+    for (var i = 0; i < ids.length; i++) if (String(ids[i][0]).trim() === String(req.id || '').trim()) { r = i + 2; break; }
+    if (r < 0) return { ok: false, error: 'Pengajuan ' + req.id + ' tidak ditemukan.' };
+    var kini = String(t.sh.getRange(r, t.kol['Status']).getDisplayValue()).trim();
+    if (status !== 'Menunggu' && kini && kini !== 'Menunggu') return { ok: false, error: 'Pengajuan sudah ' + kini.toLowerCase() + '.' };
+
+    var now = new Date(), batal = status === 'Menunggu';
+    t.sh.getRange(r, t.kol['Status']).setValue(status);
+    t.sh.getRange(r, t.kol['NIK Penyetuju']).setValue(batal ? '' : "'" + user.nik);
+    t.sh.getRange(r, t.kol['Nama Penyetuju']).setValue(batal ? '' : user.nama);
+    t.sh.getRange(r, t.kol['Waktu Putusan']).setValue(batal ? '' : now).setNumberFormat('dd/mm/yyyy HH:mm');
+    t.sh.getRange(r, t.kol['Alasan']).setValue(batal ? '' : alasan);
+    P3K_log(user.nik + ' · ' + user.nama, 'Approval', req.id + ' → ' + (batal ? 'dibatalkan (kembali Menunggu)' : status) + (alasan ? ' · ' + alasan : ''));
+    SpreadsheetApp.flush();
+    return { ok: true, id: req.id, status: status };
+  } finally { lock.releaseLock(); }
+}
+
+function P3K_tglTampil(iso) { var p = String(iso).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : String(iso); }
 
 /* ───────────────────────── Multi-tahun ───────────────────────── */
 
