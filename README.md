@@ -133,3 +133,16 @@ Ketuk kartu untuk membuka rincian kotak itu dan menyesuaikan jumlah sebelum meng
 Unggah ulang: `index.html`, `sw.js`. Backend: ganti `apps-script/Code.gs` **dan** `apps-script/Config.gs`
 (ada `SHEET_APPROVAL` & `PERAN_APPROVER` baru) → Deploy → Manage deployments → edit → *New version*.
 Cek URL `/exec` → `"versi":"v7.6-2026-10"`.
+
+### v7.6.1 — backend lebih tahan galat
+- `/exec` kini menampilkan `versi_kode`, status tab `Approvals`, dan peringatan bila Config.gs belum ada
+  atau masih ada berkas backend versi lama di proyek.
+- Fungsi diagnosis **`P3K_ujiApproval`** (Run di editor → Execution log): cek Config, spreadsheet, akun
+  Admin/Approver, tab Checklist, dan tab Approvals.
+- Aksi `approvals` (khusus Admin & Approver) untuk membaca pengajuan langsung dari server.
+- Tanpa `Array.fill` (aman untuk runtime lama).
+
+**Galat "Fungsi skrip tidak ditemukan: doGet"** = deployment memakai versi tanpa `doGet`
+(Code.gs belum disimpan, isi Code.gs tertukar dengan Config.gs, atau deployment tidak dibuat ulang
+sebagai *New version*). Pastikan berkas `Code.gs` diawali `FirstAid SASU3B — backend` dan berisi
+`function doGet`, simpan, lalu Deploy → Manage deployments → Edit → **Version: New version** → Deploy.

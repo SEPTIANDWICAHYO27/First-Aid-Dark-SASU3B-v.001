@@ -32,7 +32,7 @@ var P3K = {
   // Peran yang boleh meninjau pengajuan (kolom Role tab User, tidak peka huruf besar/kecil)
   PERAN_APPROVER: ['Admin', 'Approver'],
 
-  VERSI: 'v7.6-2026-10'
+  VERSI: 'v7.6.1-2026-10'
 };
 
 var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];

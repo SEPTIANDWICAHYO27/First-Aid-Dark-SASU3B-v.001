@@ -9,6 +9,7 @@
  *                dan mencatat ke tab Log (Riwayat Penggunaan).
  *              Setiap kiriman juga dicatat di tab Approvals berstatus "Menunggu" untuk ditinjau.
  *   putuskan   {token, id, status:'Disetujui'|'Ditolak'|'Menunggu', alasan} → khusus Admin & Approver.
+ *   approvals  {token} → isi tab Approvals (judul + baris) → khusus Admin & Approver.
  * GET  ?action=waktu → {ok, epoch, tz}   ·   ?action=tahun → daftar tab tahun   ·   tanpa parameter → status.
  *
  * Multi-tahun: tab tahun pertama bernama "Checklist P3K" (judul "... TAHUN 2026"); tahun berikutnya
@@ -24,31 +25,49 @@
  */
 
 /* Pengaturan (nama tab, folder foto, ID spreadsheet, URL Web App) ada di Config.gs. */
+var P3K_VERSI_KODE = 'v7.6.1-2026-10';
+
+/** Pesan jelas bila Config.gs belum ada / masih versi lama. Kosong = siap. */
+function P3K_cekConfig() {
+  if (typeof P3K === 'undefined') return 'Berkas Config.gs belum ada di proyek Apps Script (+ → Script → nama "Config", tempel apps-script/Config.gs).';
+  if (typeof BULAN_ID === 'undefined') return 'Config.gs tidak lengkap: BULAN_ID tidak ada. Tempel ulang seluruh isi apps-script/Config.gs.';
+  if (!P3K.SHEET_USER || !P3K.SHEET_CHECKLIST) return 'Config.gs tidak lengkap: SHEET_USER / SHEET_CHECKLIST kosong.';
+  return '';
+}
 
 /* ───────────────────────── Titik masuk ───────────────────────── */
 
 function doGet(e) {
+  var cfg = P3K_cekConfig();
+  if (cfg) return P3K_json({ ok: false, error: cfg, versi_kode: P3K_VERSI_KODE });
   var a = (e && e.parameter && e.parameter.action) || '';
   if (a === 'waktu') return P3K_json({ ok: true, epoch: Date.now(), tz: P3K_ss().getSpreadsheetTimeZone() });
   if (a === 'tahun') return P3K_json({ ok: true, daftar: P3K_daftarTahun().map(function (t) { return { tahun: t.tahun, sheet: t.sheet.getName() }; }) });
-  var info = { ok: true, app: 'FirstAid SASU3B', versi: P3K.VERSI };
+  var info = { ok: true, app: 'FirstAid SASU3B', versi: P3K.VERSI, versi_kode: P3K_VERSI_KODE };
   try {
     var ss = P3K_ss(), shU = ss.getSheetByName(P3K.SHEET_USER);
     info.spreadsheet = ss.getName();
     info.spreadsheet_id_cocok = ss.getId() === P3K.SPREADSHEET_ID;
     info.tab_user = shU ? Math.max(0, shU.getLastRow() - 1) + ' baris' : 'TIDAK DITEMUKAN';
+    var shA = ss.getSheetByName(P3K.SHEET_APPROVAL || 'Approvals');
+    info.tab_approval = shA ? Math.max(0, shA.getLastRow() - 1) + ' pengajuan' : 'belum ada (dibuat otomatis saat kiriman stok pertama)';
+    var lama = P3K_berkasLama();
+    if (lama) info.peringatan = lama;
   } catch (err) { info.spreadsheet = 'GAGAL DIBUKA: ' + err.message; }
   return P3K_json(info);
 }
 
 function doPost(e) {
   var req;
+  var cfg = P3K_cekConfig();
+  if (cfg) return P3K_json({ ok: false, error: cfg });
   try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); }
   catch (err) { return P3K_json({ ok: false, error: 'Format permintaan tidak valid.' }); }
   try {
     if (req.action === 'auth') return P3K_json(P3K_auth(req));
     if (req.action === 'checklist') return P3K_json(P3K_checklist(req));
     if (req.action === 'putuskan') return P3K_json(P3K_putuskan(req));
+    if (req.action === 'approvals') return P3K_json(P3K_daftarPengajuan(req));
     return P3K_json({ ok: false, error: 'Aksi tidak dikenal: ' + req.action });
   } catch (err) {
     return P3K_json({ ok: false, error: String(err && err.message || err) });
@@ -284,7 +303,8 @@ function P3K_tabApproval() {
 function P3K_catatPengajuan(p) {
   var t = P3K_tabApproval(), tz = P3K_ss().getSpreadsheetTimeZone();
   var id = 'APV-' + Utilities.formatDate(p.now, tz, 'yyMMdd-HHmmss') + '-' + p.kotak;
-  var baris = new Array(t.lebar).fill('');
+  var baris = [];
+  for (var b = 0; b < t.lebar; b++) baris.push('');
   var isi = { 'ID': id, 'Waktu': p.now, 'Jenis': p.jenis, 'Kotak': p.kotak, 'Bulan': p.bulan, 'Tahun': p.tahun,
     'NIK Pengaju': "'" + p.user.nik, 'Nama Pengaju': p.user.nama, 'Ringkasan': p.ringkasan,
     'Rincian': JSON.stringify(p.rincian || []), 'Foto': p.foto || '', 'Status': 'Menunggu' };
@@ -331,6 +351,61 @@ function P3K_putuskan(req) {
     SpreadsheetApp.flush();
     return { ok: true, id: req.id, status: status };
   } finally { lock.releaseLock(); }
+}
+
+/** {token} → {ok, grid:[[judul…],[baris…]…]} untuk Admin & Approver (data segar, tanpa cache gviz). */
+function P3K_daftarPengajuan(req) {
+  var user = P3K_cekToken(req.token);
+  if (!user) return { ok: false, error: 'Sesi server berakhir — masuk ulang di aplikasi.' };
+  if (!P3K_bolehMenyetujui(user)) return { ok: false, error: 'Hanya Admin & Approver yang dapat melihat pengajuan.' };
+  var sh = P3K_ss().getSheetByName(P3K.SHEET_APPROVAL || 'Approvals');
+  if (!sh || sh.getLastRow() < 1) return { ok: true, grid: [] };
+  var lr = sh.getLastRow(), mulai = Math.max(2, lr - 299);       // 300 pengajuan terakhir
+  var judul = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues();
+  var isi = lr >= 2 ? sh.getRange(mulai, 1, lr - mulai + 1, sh.getLastColumn()).getDisplayValues() : [];
+  return { ok: true, grid: judul.concat(isi) };
+}
+
+/** Deteksi berkas backend versi lama (FirstAid v2.x) yang masih tertinggal di proyek yang sama. */
+function P3K_berkasLama() {
+  var g = [];
+  try { if (typeof SANDI_PAKAI_NIK !== 'undefined') g.push('SANDI_PAKAI_NIK'); } catch (e) {}
+  try { if (typeof WEB_APP_URL !== 'undefined') g.push('WEB_APP_URL'); } catch (e) {}
+  try { if (typeof buildState === 'function') g.push('buildState()'); } catch (e) {}
+  return g.length ? 'Ada berkas backend versi lama di proyek ini (' + g.join(', ') +
+    '). Hapus berkas lama tersebut — proyek cukup berisi Config.gs dan Code.gs versi ini.' : '';
+}
+
+/**
+ * DIAGNOSIS APPROVAL — pilih fungsi ini di editor, klik Run, lalu buka "Execution log".
+ * Memeriksa Config, spreadsheet, tab User (akun Admin/Approver), tab Checklist, dan tab Approvals.
+ */
+function P3K_ujiApproval() {
+  var hasil = [];
+  var ok = function (lolos, teks) { hasil.push((lolos ? '✔ ' : '✘ ') + teks); };
+  var cfg = P3K_cekConfig();
+  ok(!cfg, cfg || 'Config.gs terbaca (' + P3K.VERSI + ') · Code.gs ' + P3K_VERSI_KODE);
+  if (cfg) { Logger.log(hasil.join('\n')); return; }
+  var lama = P3K_berkasLama(); ok(!lama, lama || 'Tidak ada berkas backend versi lama di proyek');
+  var ss;
+  try { ss = P3K_ss(); ok(true, 'Spreadsheet: ' + ss.getName()); }
+  catch (e) { ok(false, 'Spreadsheet gagal dibuka (periksa SPREADSHEET_ID di Config.gs): ' + e.message); Logger.log(hasil.join('\n')); return; }
+  var shU = ss.getSheetByName(P3K.SHEET_USER);
+  ok(!!shU, shU ? 'Tab ' + P3K.SHEET_USER + ' ditemukan' : 'Tab ' + P3K.SHEET_USER + ' TIDAK ditemukan');
+  if (shU) {
+    var v = shU.getDataRange().getDisplayValues(), peran = (P3K.PERAN_APPROVER || ['Admin', 'Approver']).map(function (x) { return x.toLowerCase(); });
+    var akun = v.slice(1).filter(function (r) { return peran.indexOf(String(r[4] || '').trim().toLowerCase()) >= 0; })
+      .map(function (r) { return String(r[3] || '').trim() + ' (' + String(r[4]).trim() + ')'; });
+    ok(akun.length > 0, akun.length ? 'Akun yang bisa meninjau: ' + akun.join(', ') : 'Tidak ada akun berperan ' + (P3K.PERAN_APPROVER || []).join('/') + ' di kolom Role tab ' + P3K.SHEET_USER);
+  }
+  var y = Number(Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), 'yyyy'));
+  var shC = P3K_sheetTahun(y);
+  ok(!!shC, shC ? 'Tab Checklist tahun ' + y + ': ' + shC.getName() : 'Tab Checklist tahun ' + y + ' belum ada (dibuat otomatis saat opname)');
+  try { var t = P3K_tabApproval(); ok(true, 'Tab ' + t.sh.getName() + ' siap · ' + Math.max(0, t.sh.getLastRow() - 1) + ' pengajuan'); }
+  catch (e) { ok(false, 'Tab Approvals gagal dibuat: ' + e.message); }
+  ok(true, 'Langkah terakhir: Deploy → Manage deployments → Edit → New version, lalu buka URL /exec → versi_kode ' + P3K_VERSI_KODE);
+  Logger.log(hasil.join('\n'));
+  return hasil;
 }
 
 function P3K_tglTampil(iso) { var p = String(iso).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : String(iso); }
