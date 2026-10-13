@@ -25,7 +25,7 @@
  */
 
 /* Pengaturan (nama tab, folder foto, ID spreadsheet, URL Web App) ada di Config.gs. */
-var P3K_VERSI_KODE = 'v7.6.1-2026-10';
+var P3K_VERSI_KODE = 'v7.6.2-2026-10';
 
 /** Pesan jelas bila Config.gs belum ada / masih versi lama. Kosong = siap. */
 function P3K_cekConfig() {
@@ -199,15 +199,15 @@ function P3K_checklist(req) {
     P3K_log(user.nik + ' · ' + user.nama, 'Update stok',
       'Kotak ' + boxId + ' · ' + BULAN_ID[bulan - 1] + ' ' + tahun + ' · ' + nItem + ' jumlah stok, ' + nExp +
       ' expired date' + (fotoUrl ? ' + foto' : '') + (rencana.tidakDikenal.length ? ' · item tak dikenal: ' + rencana.tidakDikenal.join(', ') : ''));
-    var apvId = '';
+    var apvId = '', apvErr = '';
     try {
       apvId = P3K_catatPengajuan({ jenis: 'Update stok', kotak: boxId, bulan: bulan, tahun: tahun, user: user, now: now,
         ringkasan: 'Kotak ' + boxId + ' · ' + BULAN_ID[bulan - 1] + ' ' + tahun + ' · ' + rincian.length + ' perubahan' + (fotoUrl ? ' + foto' : ''),
         rincian: rincian, foto: fotoUrl });
-    } catch (e) { console.warn('Gagal mencatat pengajuan: ' + e.message); }   // stok tetap tersimpan
+    } catch (e) { apvErr = String(e && e.message || e); console.warn('Gagal mencatat pengajuan: ' + apvErr); }   // stok tetap tersimpan
     SpreadsheetApp.flush();
 
-    return { ok: true, apv_id: apvId, perubahan: rincian.length, item_ditulis: nItem, exp_ditulis: nExp, foto: !!fotoUrl, foto_url: fotoUrl,
+    return { ok: true, apv_id: apvId, apv_error: apvErr, versi_kode: P3K_VERSI_KODE, perubahan: rincian.length, item_ditulis: nItem, exp_ditulis: nExp, foto: !!fotoUrl, foto_url: fotoUrl,
       bulan: bulan, tahun: tahun, sheet: sh.getName(), kolom_stok: P3K_hurufKolom(rencana.kolomQty), tidak_dikenal: rencana.tidakDikenal };
   } finally {
     lock.releaseLock();
