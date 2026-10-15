@@ -178,3 +178,9 @@ aplikasi (ID spreadsheet & URL backend) yang dibaca HP, berbeda dengan `Config.g
 - Empat kartu Beranda (Total baris stok, Kedaluwarsa, Di bawah ketentuan stok, Kotak lengkap) dihitung dari Update stok terbaru tiap item — bulan terakhir yang terisi, termasuk kiriman yang baru disimpan — dan diperbarui otomatis setelah simpan.
 - Kedaluwarsa = sudah lewat + < 7 hari. Di bawah ketentuan = stok < ketentuan (termasuk kosong). Kotak lengkap = semua item terisi, stok cukup, tidak kedaluwarsa / < 7 hari.
 - Kartu dapat diketuk: Kedaluwarsa & Di bawah ketentuan → Daftar belanja; Total & Kotak lengkap → menu Kotak.
+
+## v7.9 — Notifikasi HP
+- Aktifkan di **Profil → Notifikasi HP → Aktifkan notifikasi** (per perangkat; izinkan notifikasi saat diminta).
+- Isi notifikasi: pengajuan baru menunggu persetujuan (Admin & Approver) · hasil disetujui/ditolak + alasan (PIC pengaju) · stok kedaluwarsa, < 7 hari, di bawah ketentuan (sekali sehari, lagi bila bertambah) · pengingat checklist bulanan (H-2, tanggal 1, lalu tiap 3 hari selama belum lengkap).
+- Diperiksa saat aplikasi dibuka, kembali ke depan, dan tiap 5 menit selama berjalan. Android + aplikasi terpasang: pengajuan juga diperiksa di latar beberapa jam sekali (Periodic Background Sync). iPhone: pasang ke Layar Utama dulu (iOS 16.4+).
+- Ketuk notifikasi → aplikasi membuka layar terkait (Approval, Daftar belanja, atau Opname). Logika ada di `notif.js` (dipakai juga oleh `sw.js`).

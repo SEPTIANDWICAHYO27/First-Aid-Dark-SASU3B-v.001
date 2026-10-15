@@ -1,10 +1,12 @@
 /* FirstAid SASU3B — service worker
    App shell cache-first, data Google Sheets network-first dengan fallback cache
    supaya aplikasi tetap terbaca di area plant tanpa sinyal. */
-const SHELL = 'fa-sasu3b-shell-v24';
+const SHELL = 'fa-sasu3b-shell-v25';
 const DATA = 'fa-sasu3b-data-v6';
+try { importScripts('./notif.js'); } catch (e) {}
+const META = 'fa-sasu3b-meta';   // catatan notifikasi (dipakai notif.js) — jangan dihapus saat activate
 const SHELL_FILES = [
-  './', './index.html', './pasang.html', './manifest.webmanifest', './config.js', './pdfdoc.js',
+  './', './index.html', './pasang.html', './manifest.webmanifest', './config.js', './pdfdoc.js', './notif.js',
   './apple-touch-icon.png', './favicon-32.png',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png'
 ];
@@ -19,7 +21,7 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== SHELL && k !== DATA).map(k => caches.delete(k)))
+    Promise.all(keys.filter(k => k !== SHELL && k !== DATA && k !== META).map(k => caches.delete(k)))
   ).then(() => self.clients.claim()));
 });
 
@@ -67,4 +69,25 @@ self.addEventListener('sync', e => {
       icon: './icon-192.png'
     }));
   }
+});
+
+// Notifikasi: pemeriksaan pengajuan di latar (Android, aplikasi terpasang) — Periodic Background Sync.
+self.addEventListener('periodicsync', e => {
+  if (e.tag === 'fa-cek' && self.FANotif) e.waitUntil(self.FANotif.periksaLatar(self.registration));
+});
+
+// Ketuk notifikasi → buka / fokuskan aplikasi pada layar terkait.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const buka = (e.notification.data && e.notification.data.buka) || '';
+  const url = new URL('./' + (buka ? '?buka=' + encodeURIComponent(buka) : ''), self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) {
+      if (c.url.startsWith(self.registration.scope) && 'focus' in c) {
+        c.postMessage({ fa: 'buka', buka });
+        return c.focus();
+      }
+    }
+    return self.clients.openWindow(url);
+  }));
 });
