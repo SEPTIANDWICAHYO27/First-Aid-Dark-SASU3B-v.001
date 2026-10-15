@@ -173,3 +173,8 @@ aplikasi (ID spreadsheet & URL backend) yang dibaca HP, berbeda dengan `Config.g
 ## v7.7.2 — tab permintaan stok
 - gid 1115197996 ternyata tab **Checklist P3K**, jadi `GID_PERMINTAAN` dikosongkan (0 / null). Permintaan stok kini ditulis ke tab **"Permintaan"** yang dibuat otomatis saat permintaan pertama.
 - Pengaman: backend tidak pernah menulis permintaan ke tab Checklist/User/Log/Foto/Approvals atau tab berisi data lain, walau gid salah. `/exec` menampilkan `peringatan_permintaan` bila gid menunjuk tab yang salah.
+
+## v7.8 — kartu dashboard dari Update stok terbaru
+- Empat kartu Beranda (Total baris stok, Kedaluwarsa, Di bawah ketentuan stok, Kotak lengkap) dihitung dari Update stok terbaru tiap item — bulan terakhir yang terisi, termasuk kiriman yang baru disimpan — dan diperbarui otomatis setelah simpan.
+- Kedaluwarsa = sudah lewat + < 7 hari. Di bawah ketentuan = stok < ketentuan (termasuk kosong). Kotak lengkap = semua item terisi, stok cukup, tidak kedaluwarsa / < 7 hari.
+- Kartu dapat diketuk: Kedaluwarsa & Di bawah ketentuan → Daftar belanja; Total & Kotak lengkap → menu Kotak.
