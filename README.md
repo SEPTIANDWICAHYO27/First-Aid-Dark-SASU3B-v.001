@@ -146,3 +146,9 @@ Cek URL `/exec` → `"versi":"v7.6-2026-10"`.
 (Code.gs belum disimpan, isi Code.gs tertukar dengan Config.gs, atau deployment tidak dibuat ulang
 sebagai *New version*). Pastikan berkas `Code.gs` diawali `FirstAid SASU3B — backend` dan berisi
 `function doGet`, simpan, lalu Deploy → Manage deployments → Edit → **Version: New version** → Deploy.
+
+
+### Berkas backend di folder utama (v7.6.2)
+`Code-v7.6.2.gs` dan `Config-v7.6.2.gs` = salinan persis `apps-script/Code.gs` dan `apps-script/Config.gs`.
+Salin keduanya ke editor Apps Script (Code.gs dan Config.gs). **Jangan hapus `config.js`** — itu pengaturan
+aplikasi (ID spreadsheet & URL backend) yang dibaca HP, berbeda dengan `Config.gs` milik Apps Script.
