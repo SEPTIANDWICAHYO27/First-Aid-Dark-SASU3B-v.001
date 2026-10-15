@@ -34,6 +34,6 @@ window.FA_CONFIG = {
   GID: {
     CHECKLIST: null,   // null = tab dirujuk lewat nama di SHEETS
     LOG: null,
-    PERMINTAAN: 1115197996   // tab permintaan stok (angka setelah #gid= di URL tab)
+    PERMINTAAN: null   // tab permintaan stok (angka setelah #gid= di URL tab)
   }
 };

@@ -169,3 +169,7 @@ aplikasi (ID spreadsheet & URL backend) yang dibaca HP, berbeda dengan `Config.g
 ## v7.7.1 — notifikasi "Pengajuan Approval TIDAK tercatat"
 - Bila stok tersimpan tetapi server tidak memberi nomor pengajuan, aplikasi kini memeriksa URL di `config.js` dan menyebut penyebabnya: deployment belum *New version*, atau ada berkas `.gs` lama di proyek yang menimpa fungsi baru.
 - Backend: `/exec` kini menampilkan `approval_aktif` (true/false) dan `peringatan` bila `P3K_checklist()`/`doPost()` tertimpa berkas lama.
+
+## v7.7.2 — tab permintaan stok
+- gid 1115197996 ternyata tab **Checklist P3K**, jadi `GID_PERMINTAAN` dikosongkan (0 / null). Permintaan stok kini ditulis ke tab **"Permintaan"** yang dibuat otomatis saat permintaan pertama.
+- Pengaman: backend tidak pernah menulis permintaan ke tab Checklist/User/Log/Foto/Approvals atau tab berisi data lain, walau gid salah. `/exec` menampilkan `peringatan_permintaan` bila gid menunjuk tab yang salah.

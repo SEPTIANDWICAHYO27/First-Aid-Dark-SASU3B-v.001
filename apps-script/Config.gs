@@ -18,8 +18,9 @@ var P3K = {
   SHEET_FOTO: 'Foto Kotak',           // Timestamp | Kotak | Bulan | URL foto | NIK
   SHEET_APPROVAL: 'Approvals',        // pengajuan update stok untuk ditinjau Admin & Approver
   // Tab pengajuan PERMINTAAN STOK (dari Daftar belanja). Dicari lewat gid lebih dulu, lalu lewat nama.
-  // gid = angka setelah "#gid=" di URL tab tersebut.
-  GID_PERMINTAAN: 1115197996,
+  // gid = angka setelah "#gid=" di URL tab tersebut. 0 = pakai nama tab di bawah (dibuat otomatis).
+  // Catatan: gid 1115197996 ternyata tab "Checklist P3K", jadi tidak dipakai.
+  GID_PERMINTAAN: 0,
   SHEET_PERMINTAAN: 'Permintaan',
 
   // Folder Google Drive penyimpan foto kotak (dibuat otomatis bila belum ada)
@@ -36,7 +37,7 @@ var P3K = {
   // Peran yang boleh meninjau pengajuan (kolom Role tab User, tidak peka huruf besar/kecil)
   PERAN_APPROVER: ['Admin', 'Approver'],
 
-  VERSI: 'v7.7.1-2026-10'
+  VERSI: 'v7.7.2-2026-10'
 };
 
 var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];

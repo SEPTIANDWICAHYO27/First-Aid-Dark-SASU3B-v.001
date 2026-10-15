@@ -27,7 +27,7 @@
  */
 
 /* Pengaturan (nama tab, folder foto, ID spreadsheet, URL Web App) ada di Config.gs. */
-var P3K_VERSI_KODE = 'v7.7.1-2026-10';
+var P3K_VERSI_KODE = 'v7.7.2-2026-10';
 
 /** Pesan jelas bila Config.gs belum ada / masih versi lama. Kosong = siap. */
 function P3K_cekConfig() {
@@ -53,9 +53,11 @@ function doGet(e) {
     info.tab_user = shU ? Math.max(0, shU.getLastRow() - 1) + ' baris' : 'TIDAK DITEMUKAN';
     var shA = ss.getSheetByName(P3K.SHEET_APPROVAL || 'Approvals');
     info.tab_approval = shA ? Math.max(0, shA.getLastRow() - 1) + ' pengajuan' : 'belum ada (dibuat otomatis saat kiriman stok pertama)';
+    var gidSalah = P3K_cekGidPermintaan();
+    if (gidSalah) info.peringatan_permintaan = gidSalah;
     var shP = P3K_cariTabPermintaan(false);
     info.tab_permintaan = shP ? '"' + shP.getName() + '" (gid ' + shP.getSheetId() + ') · ' + Math.max(0, shP.getLastRow() - 1) + ' permintaan'
-      : 'gid ' + P3K.GID_PERMINTAAN + ' tidak ditemukan (dibuat bernama "' + (P3K.SHEET_PERMINTAAN || 'Permintaan') + '" saat permintaan pertama)';
+      : 'belum ada (tab "' + (P3K.SHEET_PERMINTAAN || 'Permintaan') + '" dibuat otomatis saat permintaan pertama)';
     var lama = P3K_berkasLama();
     info.approval_aktif = !lama;
     if (lama) info.peringatan = lama;
@@ -338,8 +340,35 @@ var P3K_KOLOM_PRM = ['ID', 'Waktu', 'NIK Pemohon', 'Nama Pemohon', 'Kotak', 'Bar
 function P3K_cariTabPermintaan(buat) {
   var ss = P3K_ss(), gid = Number(P3K.GID_PERMINTAAN || 0), nama = P3K.SHEET_PERMINTAAN || 'Permintaan';
   var semua = ss.getSheets();
-  for (var i = 0; gid && i < semua.length; i++) if (semua[i].getSheetId() === gid) return semua[i];
-  return ss.getSheetByName(nama) || (buat ? ss.insertSheet(nama) : null);
+  for (var i = 0; gid && i < semua.length; i++) {
+    if (semua[i].getSheetId() === gid) {
+      if (P3K_tabPermintaanSah(semua[i])) return semua[i];
+      break;                                             // gid menunjuk tab lain (mis. Checklist) → jangan disentuh
+    }
+  }
+  var sh = ss.getSheetByName(nama);
+  if (sh && !P3K_tabPermintaanSah(sh)) throw new Error('Tab "' + nama + '" sudah berisi data lain. Ganti SHEET_PERMINTAAN di Config.gs.');
+  return sh || (buat ? ss.insertSheet(nama) : null);
+}
+
+/** Tab boleh dipakai untuk permintaan bila kosong, atau judul barisnya memang kolom permintaan
+    — dan bukan tab inti aplikasi (Checklist tiap tahun, User, Log, Foto, Approvals). */
+function P3K_tabPermintaanSah(sh) {
+  var n = sh.getName(), inti = [P3K.SHEET_USER, P3K.SHEET_LOG, P3K.SHEET_FOTO, P3K.SHEET_APPROVAL || 'Approvals'];
+  if (inti.indexOf(n) >= 0 || n.indexOf(P3K.SHEET_CHECKLIST) === 0) return false;
+  if (sh.getLastRow() === 0) return true;
+  var judul = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map(function (x) { return String(x).trim().toLowerCase(); });
+  return judul.indexOf('id') >= 0 && judul.indexOf('nama pemohon') >= 0;
+}
+
+/** Keterangan gid untuk /exec: bila gid menunjuk tab yang bukan tab permintaan. */
+function P3K_cekGidPermintaan() {
+  var gid = Number(P3K.GID_PERMINTAAN || 0);
+  if (!gid) return '';
+  var semua = P3K_ss().getSheets();
+  for (var i = 0; i < semua.length; i++) if (semua[i].getSheetId() === gid)
+    return P3K_tabPermintaanSah(semua[i]) ? '' : 'GID_PERMINTAAN ' + gid + ' adalah tab "' + semua[i].getName() + '" (bukan tab permintaan) — diabaikan; dipakai tab "' + (P3K.SHEET_PERMINTAAN || 'Permintaan') + '".';
+  return '';
 }
 
 /** {token, rows:[{nama, qty, satuan, kotak:[…]}], catatan} */
