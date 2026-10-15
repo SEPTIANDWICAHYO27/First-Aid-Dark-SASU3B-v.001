@@ -165,3 +165,7 @@ aplikasi (ID spreadsheet & URL backend) yang dibaca HP, berbeda dengan `Config.g
   tanda tangan "Diperiksa oleh". Unduh dari kartu Approval atau dari "Permintaan stok saya" di Daftar belanja.
 - Unggah ulang: `index.html`, `sw.js` (v20), `config.js`, `pdfdoc.js`. Backend: `Code-v7.7.gs` + `Config-v7.7.gs`
   → Apps Script → *New version*. Cek `/exec` → `"versi_kode":"v7.7-2026-10"` dan `tab_permintaan`.
+
+## v7.7.1 — notifikasi "Pengajuan Approval TIDAK tercatat"
+- Bila stok tersimpan tetapi server tidak memberi nomor pengajuan, aplikasi kini memeriksa URL di `config.js` dan menyebut penyebabnya: deployment belum *New version*, atau ada berkas `.gs` lama di proyek yang menimpa fungsi baru.
+- Backend: `/exec` kini menampilkan `approval_aktif` (true/false) dan `peringatan` bila `P3K_checklist()`/`doPost()` tertimpa berkas lama.

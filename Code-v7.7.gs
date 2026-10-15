@@ -27,7 +27,7 @@
  */
 
 /* Pengaturan (nama tab, folder foto, ID spreadsheet, URL Web App) ada di Config.gs. */
-var P3K_VERSI_KODE = 'v7.7-2026-10';
+var P3K_VERSI_KODE = 'v7.7.1-2026-10';
 
 /** Pesan jelas bila Config.gs belum ada / masih versi lama. Kosong = siap. */
 function P3K_cekConfig() {
@@ -57,6 +57,7 @@ function doGet(e) {
     info.tab_permintaan = shP ? '"' + shP.getName() + '" (gid ' + shP.getSheetId() + ') · ' + Math.max(0, shP.getLastRow() - 1) + ' permintaan'
       : 'gid ' + P3K.GID_PERMINTAAN + ' tidak ditemukan (dibuat bernama "' + (P3K.SHEET_PERMINTAAN || 'Permintaan') + '" saat permintaan pertama)';
     var lama = P3K_berkasLama();
+    info.approval_aktif = !lama;
     if (lama) info.peringatan = lama;
   } catch (err) { info.spreadsheet = 'GAGAL DIBUKA: ' + err.message; }
   return P3K_json(info);
@@ -435,6 +436,9 @@ function P3K_berkasLama() {
   try { if (typeof SANDI_PAKAI_NIK !== 'undefined') g.push('SANDI_PAKAI_NIK'); } catch (e) {}
   try { if (typeof WEB_APP_URL !== 'undefined') g.push('WEB_APP_URL'); } catch (e) {}
   try { if (typeof buildState === 'function') g.push('buildState()'); } catch (e) {}
+  // Fungsi bernama sama di berkas lain menimpa versi ini (Apps Script berbagi satu ruang nama).
+  try { if (String(P3K_checklist).indexOf('P3K_catatPengajuan') < 0) g.push('P3K_checklist() lama'); } catch (e) {}
+  try { if (String(doPost).indexOf('P3K_putuskan') < 0) g.push('doPost() lama'); } catch (e) {}
   return g.length ? 'Ada berkas backend versi lama di proyek ini (' + g.join(', ') +
     '). Hapus berkas lama tersebut — proyek cukup berisi Config.gs dan Code.gs versi ini.' : '';
 }
