@@ -148,7 +148,20 @@ sebagai *New version*). Pastikan berkas `Code.gs` diawali `FirstAid SASU3B — b
 `function doGet`, simpan, lalu Deploy → Manage deployments → Edit → **Version: New version** → Deploy.
 
 
-### Berkas backend di folder utama (v7.6.2)
-`Code-v7.6.2.gs` dan `Config-v7.6.2.gs` = salinan persis `apps-script/Code.gs` dan `apps-script/Config.gs`.
+### Berkas backend di folder utama (v7.7)
+`Code-v7.7.gs` dan `Config-v7.7.gs` = salinan persis `apps-script/Code.gs` dan `apps-script/Config.gs`.
 Salin keduanya ke editor Apps Script (Code.gs dan Config.gs). **Jangan hapus `config.js`** — itu pengaturan
 aplikasi (ID spreadsheet & URL backend) yang dibaca HP, berbeda dengan `Config.gs` milik Apps Script.
+
+
+## Pembaruan v7.7 — Approval permintaan stok
+- **Daftar belanja → "Ajukan permintaan stok ke Approver"**: barang yang belum ditandai dibeli dikirim sebagai
+  permintaan (ID `PRM-…`) ke tab permintaan stok — tab dengan **gid 1115197996** (`GID_PERMINTAAN` di Config.gs dan
+  `GID.PERMINTAAN` di config.js). Judul kolom dibuat otomatis bila tab kosong:
+  ID | Waktu | NIK Pemohon | Nama Pemohon | Kotak | Barang | Rincian | Jumlah | Catatan | Status | NIK Penyetuju | Nama Penyetuju | Waktu Putusan | Alasan.
+  Bila gid tidak ditemukan, dibuat tab bernama `Permintaan`.
+- **Menu Approval** (Admin & Approver) kini berisi update stok **dan** permintaan stok; muncul bila ada yang menunggu.
+- **PDF permintaan** memuat kotak status (Disetujui/Ditolak/Menunggu) serta nama & tanggal penyetuju di kolom
+  tanda tangan "Diperiksa oleh". Unduh dari kartu Approval atau dari "Permintaan stok saya" di Daftar belanja.
+- Unggah ulang: `index.html`, `sw.js` (v20), `config.js`, `pdfdoc.js`. Backend: `Code-v7.7.gs` + `Config-v7.7.gs`
+  → Apps Script → *New version*. Cek `/exec` → `"versi_kode":"v7.7-2026-10"` dan `tab_permintaan`.

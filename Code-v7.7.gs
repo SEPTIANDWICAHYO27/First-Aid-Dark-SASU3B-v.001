@@ -9,7 +9,9 @@
  *                dan mencatat ke tab Log (Riwayat Penggunaan).
  *              Setiap kiriman juga dicatat di tab Approvals berstatus "Menunggu" untuk ditinjau.
  *   putuskan   {token, id, status:'Disetujui'|'Ditolak'|'Menunggu', alasan} → khusus Admin & Approver.
- *   approvals  {token} → isi tab Approvals (judul + baris) → khusus Admin & Approver.
+ *   approvals  {token} → isi tab Approvals & Permintaan (judul + baris) → khusus Admin & Approver.
+ *   ajukan_permintaan {token, rows:[{nama, qty, satuan, kotak:[…]}], catatan} → tab Permintaan (gid di Config),
+ *              status "Menunggu"; diputuskan lewat aksi putuskan (ID berawalan PRM-).
  * GET  ?action=waktu → {ok, epoch, tz}   ·   ?action=tahun → daftar tab tahun   ·   tanpa parameter → status.
  *
  * Multi-tahun: tab tahun pertama bernama "Checklist P3K" (judul "... TAHUN 2026"); tahun berikutnya
@@ -25,7 +27,7 @@
  */
 
 /* Pengaturan (nama tab, folder foto, ID spreadsheet, URL Web App) ada di Config.gs. */
-var P3K_VERSI_KODE = 'v7.6.2-2026-10';
+var P3K_VERSI_KODE = 'v7.7-2026-10';
 
 /** Pesan jelas bila Config.gs belum ada / masih versi lama. Kosong = siap. */
 function P3K_cekConfig() {
@@ -51,6 +53,9 @@ function doGet(e) {
     info.tab_user = shU ? Math.max(0, shU.getLastRow() - 1) + ' baris' : 'TIDAK DITEMUKAN';
     var shA = ss.getSheetByName(P3K.SHEET_APPROVAL || 'Approvals');
     info.tab_approval = shA ? Math.max(0, shA.getLastRow() - 1) + ' pengajuan' : 'belum ada (dibuat otomatis saat kiriman stok pertama)';
+    var shP = P3K_cariTabPermintaan(false);
+    info.tab_permintaan = shP ? '"' + shP.getName() + '" (gid ' + shP.getSheetId() + ') · ' + Math.max(0, shP.getLastRow() - 1) + ' permintaan'
+      : 'gid ' + P3K.GID_PERMINTAAN + ' tidak ditemukan (dibuat bernama "' + (P3K.SHEET_PERMINTAAN || 'Permintaan') + '" saat permintaan pertama)';
     var lama = P3K_berkasLama();
     if (lama) info.peringatan = lama;
   } catch (err) { info.spreadsheet = 'GAGAL DIBUKA: ' + err.message; }
@@ -68,6 +73,7 @@ function doPost(e) {
     if (req.action === 'checklist') return P3K_json(P3K_checklist(req));
     if (req.action === 'putuskan') return P3K_json(P3K_putuskan(req));
     if (req.action === 'approvals') return P3K_json(P3K_daftarPengajuan(req));
+    if (req.action === 'ajukan_permintaan') return P3K_json(P3K_ajukanPermintaan(req));
     return P3K_json({ ok: false, error: 'Aksi tidak dikenal: ' + req.action });
   } catch (err) {
     return P3K_json({ ok: false, error: String(err && err.message || err) });
@@ -285,14 +291,18 @@ var P3K_KOLOM_APV = ['ID', 'Waktu', 'Jenis', 'Kotak', 'Bulan', 'Tahun', 'NIK Pen
 /** Tab Approvals beserta peta kolom (dibuat / dilengkapi otomatis). */
 function P3K_tabApproval() {
   var ss = P3K_ss(), nama = P3K.SHEET_APPROVAL || 'Approvals';
-  var sh = ss.getSheetByName(nama) || ss.insertSheet(nama);
+  return P3K_siapkanTab(ss.getSheetByName(nama) || ss.insertSheet(nama), P3K_KOLOM_APV);
+}
+
+/** Tulis judul kolom bila tab kosong; tambahkan kolom yang belum ada. → {sh, kol:{nama→nomor kolom}, lebar} */
+function P3K_siapkanTab(sh, kolom) {
   if (sh.getLastRow() === 0) {
-    sh.getRange(1, 1, 1, P3K_KOLOM_APV.length).setValues([P3K_KOLOM_APV]).setFontWeight('bold');
+    sh.getRange(1, 1, 1, kolom.length).setValues([kolom]).setFontWeight('bold');
     sh.setFrozenRows(1);
   }
   var judul = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getDisplayValues()[0].map(function (x) { return String(x).trim().toLowerCase(); });
   var kol = {};
-  P3K_KOLOM_APV.forEach(function (k) {
+  kolom.forEach(function (k) {
     var i = judul.indexOf(k.toLowerCase());
     if (i < 0) { i = judul.length; judul.push(k.toLowerCase()); sh.getRange(1, i + 1).setValue(k).setFontWeight('bold'); }
     kol[k] = i + 1;
@@ -319,7 +329,55 @@ function P3K_bolehMenyetujui(user) {
   return !!user && daftar.indexOf(String(user.peran || '').trim().toLowerCase()) >= 0;
 }
 
-/** {token, id, status:'Disetujui'|'Ditolak'|'Menunggu', alasan} */
+/* ───────────── Permintaan stok (dari Daftar belanja) ───────────── */
+var P3K_KOLOM_PRM = ['ID', 'Waktu', 'NIK Pemohon', 'Nama Pemohon', 'Kotak', 'Barang', 'Rincian', 'Jumlah', 'Catatan',
+  'Status', 'NIK Penyetuju', 'Nama Penyetuju', 'Waktu Putusan', 'Alasan'];
+
+/** Tab permintaan: dicari lewat gid (Config GID_PERMINTAAN), lalu nama; buat=true → dibuat bila belum ada. */
+function P3K_cariTabPermintaan(buat) {
+  var ss = P3K_ss(), gid = Number(P3K.GID_PERMINTAAN || 0), nama = P3K.SHEET_PERMINTAAN || 'Permintaan';
+  var semua = ss.getSheets();
+  for (var i = 0; gid && i < semua.length; i++) if (semua[i].getSheetId() === gid) return semua[i];
+  return ss.getSheetByName(nama) || (buat ? ss.insertSheet(nama) : null);
+}
+
+/** {token, rows:[{nama, qty, satuan, kotak:[…]}], catatan} */
+function P3K_ajukanPermintaan(req) {
+  var user = P3K_cekToken(req.token);
+  if (!user) return { ok: false, error: 'Sesi server berakhir — masuk ulang di aplikasi.' };
+  var rows = (req.rows || []).map(function (r) {
+    var kotak = (r.kotak || []).map(String).filter(function (k) { return /^\d{3,}$/.test(k); });
+    return { n: String(r.nama || '').trim().slice(0, 120), q: Math.round(Number(r.qty) || 0), u: String(r.satuan || '').trim().slice(0, 20), k: kotak };
+  }).filter(function (r) { return r.n && r.q > 0; });
+  if (!rows.length) return { ok: false, error: 'Daftar permintaan kosong — pilih minimal satu barang.' };
+  if (rows.length > 60) return { ok: false, error: 'Terlalu banyak baris (maks. 60).' };
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var t = P3K_siapkanTab(P3K_cariTabPermintaan(true), P3K_KOLOM_PRM), now = new Date(), tz = P3K_ss().getSpreadsheetTimeZone();
+    var ada = {}, n = t.sh.getLastRow();
+    if (n >= 2) t.sh.getRange(2, t.kol['ID'], n - 1, 1).getDisplayValues().forEach(function (r) { ada[String(r[0]).trim()] = 1; });
+    var dasar = 'PRM-' + Utilities.formatDate(now, tz, 'yyMMdd-HHmmss'), id = dasar, k = 1;
+    while (ada[id]) id = dasar + '-' + (++k);
+    var kotakSemua = [];
+    rows.forEach(function (r) { r.k.forEach(function (x) { if (kotakSemua.indexOf(x) < 0) kotakSemua.push(x); }); });
+    var total = rows.reduce(function (s, r) { return s + r.q; }, 0);
+    var isi = { 'ID': id, 'Waktu': now, 'NIK Pemohon': "'" + user.nik, 'Nama Pemohon': user.nama, 'Kotak': kotakSemua.sort().join(', '),
+      'Barang': rows.map(function (r) { return r.n + ' ×' + r.q + (r.u ? ' ' + r.u : ''); }).join('; '),
+      'Rincian': JSON.stringify(rows), 'Jumlah': total, 'Catatan': String(req.catatan || '').trim().slice(0, 500), 'Status': 'Menunggu' };
+    var baris = [];
+    for (var b = 0; b < t.lebar; b++) baris.push('');
+    Object.keys(isi).forEach(function (key) { baris[t.kol[key] - 1] = isi[key]; });
+    t.sh.appendRow(baris);
+    t.sh.getRange(t.sh.getLastRow(), t.kol['Waktu']).setNumberFormat('dd/mm/yyyy HH:mm');
+    P3K_log(user.nik + ' · ' + user.nama, 'Permintaan stok', id + ' · ' + rows.length + ' jenis, ' + total + ' item · kotak ' + isi['Kotak']);
+    SpreadsheetApp.flush();
+    return { ok: true, id: id, jenis: rows.length, total: total, tab: t.sh.getName() };
+  } finally { lock.releaseLock(); }
+}
+
+/** {token, id, status:'Disetujui'|'Ditolak'|'Menunggu', alasan} — ID APV-… (update stok) atau PRM-… (permintaan). */
 function P3K_putuskan(req) {
   var user = P3K_cekToken(req.token);
   if (!user) return { ok: false, error: 'Sesi server berakhir — masuk ulang di aplikasi.' };
@@ -332,7 +390,10 @@ function P3K_putuskan(req) {
   var lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
-    var t = P3K_tabApproval(), n = t.sh.getLastRow();
+    var prm = /^PRM-/i.test(String(req.id || '').trim());
+    var shP = prm ? P3K_cariTabPermintaan(false) : null;
+    if (prm && !shP) return { ok: false, error: 'Tab permintaan tidak ditemukan.' };
+    var t = prm ? P3K_siapkanTab(shP, P3K_KOLOM_PRM) : P3K_tabApproval(), n = t.sh.getLastRow();
     if (n < 2) return { ok: false, error: 'Pengajuan tidak ditemukan.' };
     var ids = t.sh.getRange(2, t.kol['ID'], n - 1, 1).getDisplayValues();
     var r = -1;
@@ -347,7 +408,7 @@ function P3K_putuskan(req) {
     t.sh.getRange(r, t.kol['Nama Penyetuju']).setValue(batal ? '' : user.nama);
     t.sh.getRange(r, t.kol['Waktu Putusan']).setValue(batal ? '' : now).setNumberFormat('dd/mm/yyyy HH:mm');
     t.sh.getRange(r, t.kol['Alasan']).setValue(batal ? '' : alasan);
-    P3K_log(user.nik + ' · ' + user.nama, 'Approval', req.id + ' → ' + (batal ? 'dibatalkan (kembali Menunggu)' : status) + (alasan ? ' · ' + alasan : ''));
+    P3K_log(user.nik + ' · ' + user.nama, prm ? 'Approval permintaan' : 'Approval', req.id + ' → ' + (batal ? 'dibatalkan (kembali Menunggu)' : status) + (alasan ? ' · ' + alasan : ''));
     SpreadsheetApp.flush();
     return { ok: true, id: req.id, status: status };
   } finally { lock.releaseLock(); }
@@ -358,12 +419,14 @@ function P3K_daftarPengajuan(req) {
   var user = P3K_cekToken(req.token);
   if (!user) return { ok: false, error: 'Sesi server berakhir — masuk ulang di aplikasi.' };
   if (!P3K_bolehMenyetujui(user)) return { ok: false, error: 'Hanya Admin & Approver yang dapat melihat pengajuan.' };
-  var sh = P3K_ss().getSheetByName(P3K.SHEET_APPROVAL || 'Approvals');
-  if (!sh || sh.getLastRow() < 1) return { ok: true, grid: [] };
-  var lr = sh.getLastRow(), mulai = Math.max(2, lr - 299);       // 300 pengajuan terakhir
-  var judul = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues();
-  var isi = lr >= 2 ? sh.getRange(mulai, 1, lr - mulai + 1, sh.getLastColumn()).getDisplayValues() : [];
-  return { ok: true, grid: judul.concat(isi) };
+  var ambil = function (sh) {
+    if (!sh || sh.getLastRow() < 1) return [];
+    var lr = sh.getLastRow(), mulai = Math.max(2, lr - 299);       // 300 baris terakhir
+    var judul = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues();
+    var isi = lr >= 2 ? sh.getRange(mulai, 1, lr - mulai + 1, sh.getLastColumn()).getDisplayValues() : [];
+    return judul.concat(isi);
+  };
+  return { ok: true, grid: ambil(P3K_ss().getSheetByName(P3K.SHEET_APPROVAL || 'Approvals')), grid_permintaan: ambil(P3K_cariTabPermintaan(false)) };
 }
 
 /** Deteksi berkas backend versi lama (FirstAid v2.x) yang masih tertinggal di proyek yang sama. */
@@ -403,6 +466,11 @@ function P3K_ujiApproval() {
   ok(!!shC, shC ? 'Tab Checklist tahun ' + y + ': ' + shC.getName() : 'Tab Checklist tahun ' + y + ' belum ada (dibuat otomatis saat opname)');
   try { var t = P3K_tabApproval(); ok(true, 'Tab ' + t.sh.getName() + ' siap · ' + Math.max(0, t.sh.getLastRow() - 1) + ' pengajuan'); }
   catch (e) { ok(false, 'Tab Approvals gagal dibuat: ' + e.message); }
+  try {
+    var tp = P3K_siapkanTab(P3K_cariTabPermintaan(true), P3K_KOLOM_PRM);
+    ok(true, 'Tab permintaan "' + tp.sh.getName() + '" (gid ' + tp.sh.getSheetId() + ') siap · ' + Math.max(0, tp.sh.getLastRow() - 1) + ' permintaan' +
+      (Number(P3K.GID_PERMINTAAN) && tp.sh.getSheetId() !== Number(P3K.GID_PERMINTAAN) ? ' — PERHATIAN: gid ' + P3K.GID_PERMINTAAN + ' tidak ditemukan, dipakai tab bernama ' + tp.sh.getName() : ''));
+  } catch (e) { ok(false, 'Tab permintaan gagal disiapkan: ' + e.message); }
   ok(true, 'Langkah terakhir: Deploy → Manage deployments → Edit → New version, lalu buka URL /exec → versi_kode ' + P3K_VERSI_KODE);
   Logger.log(hasil.join('\n'));
   return hasil;

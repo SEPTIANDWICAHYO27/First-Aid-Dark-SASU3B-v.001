@@ -15,7 +15,8 @@ window.FA_CONFIG = {
     LOG: "Log",                   // judul isi: Riwayat Penggunaan
     APPROVALS: "Approvals",
     PURCHASE: "Purchase",
-    FOTO: "Foto Kotak"            // Timestamp | Kotak | Bulan | URL foto | NIK
+    FOTO: "Foto Kotak",           // Timestamp | Kotak | Bulan | URL foto | NIK
+    PERMINTAAN: "Permintaan"      // permintaan stok dari Daftar belanja (dipakai bila GID.PERMINTAAN kosong)
   },
 
   // Multi-tahun: tab tahun pertama = SHEETS.CHECKLIST ("Checklist P3K", judul TAHUN 2026);
@@ -32,6 +33,7 @@ window.FA_CONFIG = {
   // gid tab tertentu (dipakai bila nama tab tidak bisa dirujuk langsung)
   GID: {
     CHECKLIST: null,   // null = tab dirujuk lewat nama di SHEETS
-    LOG: null
+    LOG: null,
+    PERMINTAAN: 1115197996   // tab permintaan stok (angka setelah #gid= di URL tab)
   }
 };

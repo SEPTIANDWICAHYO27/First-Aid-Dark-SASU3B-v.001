@@ -261,8 +261,21 @@
       cat.forEach(function (ln, i) { doc.teks(M + 8, y + 14 + i * 11, ln, { size: 8.5 }); });
       y += hCat + 8;
 
+      /* Status pengajuan (permintaan stok dari aplikasi) */
+      var st = d.status || null;
+      if (st && st.label) {
+        var warnaSt = /setuju/i.test(st.label) ? '#2f6f5b' : /tolak/i.test(st.label) ? MERAH : '#96690a';
+        if (y + 22 + 120 > PH - M - 20) { doc.baru(); kepala(true); }
+        doc.kotak(M, y, LB, 20, { stroke: warnaSt, lw: 0.8 });
+        doc.teks(M + 8, y + 13, ansi('STATUS: ' + st.label.toUpperCase() + (st.oleh ? ' · oleh ' + st.oleh : '') + (st.waktu ? ' · ' + st.waktu : '')),
+          { size: 8.5, bold: true, color: warnaSt });
+        y += 30;
+      }
       /* Tanda tangan */
-      var ttd = [['Diajukan oleh,', d.pemohon, 'NIK ' + d.nik], ['Diperiksa oleh,', '', 'Approver'], ['Disetujui oleh,', '', 'Atasan / Superintendent']];
+      var setuju = st && /setuju/i.test(st.label || '') && st.oleh;
+      var ttd = [['Diajukan oleh,', d.pemohon, 'NIK ' + d.nik],
+        ['Diperiksa oleh,', setuju ? st.oleh : '', setuju ? 'Approver · disetujui ' + (st.waktu || '') : 'Approver'],
+        ['Disetujui oleh,', '', 'Atasan / Superintendent']];
       var tw = LB / 3;
       doc.teks(PW - M, y, d.tanggal, { size: 8.5, align: 'right', color: MUT });
       y += 14;
