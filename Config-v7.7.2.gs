@@ -9,7 +9,7 @@ var P3K = {
   SPREADSHEET_ID: '1P246a1UMf6wGyA7MGHOk5qw20Lzd-SF5eEHprfbUlYs',
 
   // URL Web App deployment aktif (sama dengan API_URL di config.js aplikasi) — sebagai catatan & uji.
-  WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbyC2SG1UQbrPr4oX3LitG6yae2WOX7aMJtUef_j7bndvy1_Bx6q3eB7oaGj9tBQzqIY5A/exec',
+  WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbziSDmsMJ9PoJNM_r-LTE9Qk3JOaKyj5Ud6dEuifFmNKXLObs1tVPNxztzvZJ5t00xP0Q/exec',
 
   // Nama tab
   SHEET_CHECKLIST: 'Checklist P3K',   // tahun awal; tahun berikutnya "Checklist P3K 2027", dst.
