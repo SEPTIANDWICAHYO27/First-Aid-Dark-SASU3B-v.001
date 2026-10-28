@@ -196,3 +196,10 @@ Menu **Beranda** menjadi **Dashboard** dengan 7 bagian bernomor:
 5. **Kedaluwarsa mendatang** — timeline 12 bulan + 5 item terdekat (90 hari).
 6. **Pengadaan & persetujuan** — daftar belanja, kotak perlu dokumen PDF, approval.
 7. **Dokumentasi foto** — galeri foto kotak per bulan; tombol Riwayat, Notifikasi, Sinkron.
+
+## Pembaruan v8.1 — Tema terang "Light Emerald Luxury"
+
+Latar aplikasi: gradasi abu-abu terang (#f5f7f8 → #edf1f2) ke emerald lembut (#e2f1ea → #cdeedf)
+dengan pendaran emerald halus di kanan atas dan sentuhan emas di kiri bawah.
+Kartu putih semi-transparan, teks abu-gelap, aksen emerald (#1f9d77 / #127a5c), emas (#a07a2c),
+status bar & navigasi bawah berefek kaca. Layar pembuka & warna tema (manifest) ikut terang.
