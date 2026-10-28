@@ -34,10 +34,13 @@ var P3K = {
   // Mulai bulan ke berapa tab tahun berikutnya disiapkan (12 = Desember)
   BULAN_SIAPKAN_TAHUN_DEPAN: 12,
 
+  // Tombol "+ tahun" di aplikasi (Admin & Approver) boleh membuat tab s.d. tahun berjalan + nilai ini
+  TAHUN_MAKS_DEPAN: 5,
+
   // Peran yang boleh meninjau pengajuan (kolom Role tab User, tidak peka huruf besar/kecil)
   PERAN_APPROVER: ['Admin', 'Approver'],
 
-  VERSI: 'v7.7.2-2026-10'
+  VERSI: 'v7.8-2026-10'
 };
 
 var BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];

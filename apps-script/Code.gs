@@ -12,6 +12,8 @@
  *   approvals  {token} → isi tab Approvals & Permintaan (judul + baris) → khusus Admin & Approver.
  *   ajukan_permintaan {token, rows:[{nama, qty, satuan, kotak:[…]}], catatan} → tab Permintaan (gid di Config),
  *              status "Menunggu"; diputuskan lewat aksi putuskan (ID berawalan PRM-).
+ *   tahun_baru {token, tahun} → khusus Admin & Approver: buat tab "Checklist P3K <tahun>" sekarang
+ *              (format disalin dari tahun terakhir, data bulanan kosong) → {ok, tahun, sheet, dibuat, daftar}.
  * GET  ?action=waktu → {ok, epoch, tz}   ·   ?action=tahun → daftar tab tahun   ·   tanpa parameter → status.
  *
  * Multi-tahun: tab tahun pertama bernama "Checklist P3K" (judul "... TAHUN 2026"); tahun berikutnya
@@ -27,7 +29,7 @@
  */
 
 /* Pengaturan (nama tab, folder foto, ID spreadsheet, URL Web App) ada di Config.gs. */
-var P3K_VERSI_KODE = 'v7.7.2-2026-10';
+var P3K_VERSI_KODE = 'v7.8-2026-10';
 
 /** Pesan jelas bila Config.gs belum ada / masih versi lama. Kosong = siap. */
 function P3K_cekConfig() {
@@ -77,6 +79,7 @@ function doPost(e) {
     if (req.action === 'putuskan') return P3K_json(P3K_putuskan(req));
     if (req.action === 'approvals') return P3K_json(P3K_daftarPengajuan(req));
     if (req.action === 'ajukan_permintaan') return P3K_json(P3K_ajukanPermintaan(req));
+    if (req.action === 'tahun_baru') return P3K_json(P3K_tahunBaru(req));
     return P3K_json({ ok: false, error: 'Aksi tidak dikenal: ' + req.action });
   } catch (err) {
     return P3K_json({ ok: false, error: String(err && err.message || err) });
@@ -576,6 +579,45 @@ function P3K_siapkanTahun(tahun) {
   }
   P3K_log('Sistem', 'Siapkan tahun', 'Tab "' + nama + '" dibuat dari format "' + sumber.getName() + '" — data bulanan dikosongkan');
   return baru;
+}
+
+/**
+ * Aksi aplikasi "tahun_baru" (Admin & Approver): siapkan tab tahun yang diminta sekarang juga.
+ * Tahun di antara tab terakhir dan tahun yang diminta ikut dibuat berurutan agar formatnya bersambung.
+ * Batas: s.d. tahun berjalan + P3K.TAHUN_MAKS_DEPAN (bawaan 5).
+ */
+function P3K_tahunBaru(req) {
+  var user = P3K_cekToken(req.token);
+  if (!user) return { ok: false, error: 'Sesi server berakhir — masuk ulang di aplikasi.' };
+  if (!P3K_bolehMenyetujui(user)) return { ok: false, error: 'Hanya Admin & Approver yang dapat menambah tahun.' };
+  var tz = P3K_ss().getSpreadsheetTimeZone();
+  var kini = Number(Utilities.formatDate(new Date(), tz, 'yyyy'));
+  var daftar = P3K_daftarTahun();
+  if (!daftar.length) return { ok: false, error: 'Tab Checklist awal tidak ditemukan.' };
+  var pertama = daftar[0].tahun, terakhir = daftar[daftar.length - 1].tahun;
+  var tahun = parseInt(req.tahun, 10) || (terakhir + 1);
+  var maks = kini + (P3K.TAHUN_MAKS_DEPAN || 5);
+  if (tahun < pertama || tahun > maks)
+    return { ok: false, error: 'Tahun harus antara ' + pertama + ' dan ' + maks + '.' };
+  var sudahAda = !!P3K_sheetTahun(tahun);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    for (var y = terakhir + 1; y <= tahun; y++) P3K_siapkanTahun(y);
+    P3K_siapkanTahun(tahun);
+  } finally { lock.releaseLock(); }
+  var sh = P3K_sheetTahun(tahun);
+  if (!sudahAda) P3K_log(user.nik + ' · ' + user.nama, 'Tambah tahun', 'Tab "' + sh.getName() + '" dibuat dari aplikasi');
+  return { ok: true, tahun: tahun, sheet: sh.getName(), dibuat: !sudahAda,
+    daftar: P3K_daftarTahun().map(function (t) { return { tahun: t.tahun, sheet: t.sheet.getName() }; }) };
+}
+
+/** Jalankan dari editor bila perlu: buat tab tahun berikutnya setelah tab terakhir. */
+function P3K_tambahTahunBerikutnya() {
+  var d = P3K_daftarTahun(), y = d.length ? d[d.length - 1].tahun + 1 : 0;
+  if (!y) throw new Error('Tab Checklist awal tidak ditemukan.');
+  P3K_siapkanTahun(y);
+  Logger.log('Tab tahun: %s', P3K_daftarTahun().map(function (t) { return t.tahun + '=' + t.sheet.getName(); }).join(', '));
 }
 
 /** Dijalankan trigger harian: pastikan tab tahun berjalan ada; sejak Desember siapkan tahun berikutnya. */

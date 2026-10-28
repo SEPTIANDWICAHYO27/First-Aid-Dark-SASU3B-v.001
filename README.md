@@ -215,3 +215,15 @@ teks abu-gelap hangat. Warna status tetap: hijau = aman, kuning = perhatian, mer
 Atas permintaan, tampilan dikembalikan ke kondisi sebelum v8.0: Beranda lama dengan tema gelap
 (index.html & manifest dari commit ed1932d). Dashboard 7 bagian (v8.0) dan tema terang (v8.1, v8.2)
 dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap ada di git.
+
+## Pembaruan v8.4 — periode tahun & tab sheet tahun berikutnya
+
+- **Aplikasi:** baris **Tahun** kini membaca daftar tab tahun dari backend (`?action=tahun`), dengan
+  cadangan pemeriksaan tab s.d. 5 tahun ke depan. **Admin & Approver** melihat tombol **"+ 2028"** (tahun
+  setelah tab terakhir): ketuk → konfirmasi → tab `Checklist P3K 2028` dibuat di Google Sheets dan tahunnya
+  langsung bisa dipilih. Batas: tahun berjalan + 5.
+- **Backend (Code.gs v7.8):** aksi `tahun_baru` {token, tahun} khusus Admin & Approver. Format tab
+  (kotak, PIC, isi, ketentuan stok) disalin dari tahun terakhir, kolom bulanan dikosongkan; tahun di
+  antaranya ikut dibuat berurutan; dicatat di Log. `Config.gs`: `TAHUN_MAKS_DEPAN: 5`.
+  Dari editor: `P3K_tambahTahunBerikutnya()`.
+  **Wajib:** tempel `Code.gs` & `Config.gs` terbaru → Deploy → Manage deployments → Edit → New version.
