@@ -209,3 +209,9 @@ status bar & navigasi bawah berefek kaca. Layar pembuka & warna tema (manifest) 
 Latar: gradasi abu-abu terang (#f6f6f7 → #eeeef0) ke maroon muda (#f1e5e7 → #e8d0d5) dengan pendaran
 maroon halus di kanan atas. Aksen utama maroon (#8c2f3c, tautan #7a1f2e), sentuhan emas (#a07a2c),
 teks abu-gelap hangat. Warna status tetap: hijau = aman, kuning = perhatian, merah = kritis.
+
+## Pembaruan v8.3 — kembali ke Beranda lama (tema gelap)
+
+Atas permintaan, tampilan dikembalikan ke kondisi sebelum v8.0: Beranda lama dengan tema gelap
+(index.html & manifest dari commit ed1932d). Dashboard 7 bagian (v8.0) dan tema terang (v8.1, v8.2)
+dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap ada di git.
