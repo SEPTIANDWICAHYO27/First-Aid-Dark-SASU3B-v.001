@@ -184,3 +184,15 @@ aplikasi (ID spreadsheet & URL backend) yang dibaca HP, berbeda dengan `Config.g
 - Isi notifikasi: pengajuan baru menunggu persetujuan (Admin & Approver) · hasil disetujui/ditolak + alasan (PIC pengaju) · stok kedaluwarsa, < 7 hari, di bawah ketentuan (sekali sehari, lagi bila bertambah) · pengingat checklist bulanan (H-2, tanggal 1, lalu tiap 3 hari selama belum lengkap).
 - Diperiksa saat aplikasi dibuka, kembali ke depan, dan tiap 5 menit selama berjalan. Android + aplikasi terpasang: pengajuan juga diperiksa di latar beberapa jam sekali (Periodic Background Sync). iPhone: pasang ke Layar Utama dulu (iOS 16.4+).
 - Ketuk notifikasi → aplikasi membuka layar terkait (Approval, Daftar belanja, atau Opname). Logika ada di `notif.js` (dipakai juga oleh `sw.js`).
+
+## Pembaruan v8.0 — Dashboard terstruktur
+
+Menu **Beranda** menjadi **Dashboard** dengan 7 bagian bernomor:
+1. **Ringkasan kesiapan** — skor % item aman (dari item yang sudah tercatat), bar komposisi
+   Aman / Perhatian / Kritis / Belum diisi, serta kartu Kedaluwarsa, Di bawah ketentuan, Kotak lengkap, Total baris.
+2. **Checklist bulan berjalan** — progres update stok & foto per kotak (x/9).
+3. **Status per kotak** — tabel 9 kotak: lokasi, PIC, bar kondisi, status, ✓ stok & ✓ foto bulan ini; ketuk → detail kotak.
+4. **Perlu tindakan** — item kedaluwarsa, kosong, < 7 hari, kurang, lengkap dengan tindakan (ganti / isi ulang / tambah n).
+5. **Kedaluwarsa mendatang** — timeline 12 bulan + 5 item terdekat (90 hari).
+6. **Pengadaan & persetujuan** — daftar belanja, kotak perlu dokumen PDF, approval.
+7. **Dokumentasi foto** — galeri foto kotak per bulan; tombol Riwayat, Notifikasi, Sinkron.
