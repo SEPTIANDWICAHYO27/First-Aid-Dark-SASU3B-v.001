@@ -1,7 +1,7 @@
 /* FirstAid SASU3B — service worker
    App shell cache-first, data Google Sheets network-first dengan fallback cache
    supaya aplikasi tetap terbaca di area plant tanpa sinyal. */
-const SHELL = 'fa-sasu3b-shell-v28';
+const SHELL = 'fa-sasu3b-shell-v29';
 const DATA = 'fa-sasu3b-data-v6';
 try { importScripts('./notif.js'); } catch (e) {}
 const META = 'fa-sasu3b-meta';   // catatan notifikasi (dipakai notif.js) — jangan dihapus saat activate
