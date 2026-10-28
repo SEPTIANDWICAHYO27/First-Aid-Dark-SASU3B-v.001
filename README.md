@@ -203,3 +203,9 @@ Latar aplikasi: gradasi abu-abu terang (#f5f7f8 → #edf1f2) ke emerald lembut (
 dengan pendaran emerald halus di kanan atas dan sentuhan emas di kiri bawah.
 Kartu putih semi-transparan, teks abu-gelap, aksen emerald (#1f9d77 / #127a5c), emas (#a07a2c),
 status bar & navigasi bawah berefek kaca. Layar pembuka & warna tema (manifest) ikut terang.
+
+## Pembaruan v8.2 — Tema "Grey & Maroon Pro"
+
+Latar: gradasi abu-abu terang (#f6f6f7 → #eeeef0) ke maroon muda (#f1e5e7 → #e8d0d5) dengan pendaran
+maroon halus di kanan atas. Aksen utama maroon (#8c2f3c, tautan #7a1f2e), sentuhan emas (#a07a2c),
+teks abu-gelap hangat. Warna status tetap: hijau = aman, kuning = perhatian, merah = kritis.
