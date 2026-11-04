@@ -265,3 +265,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Kartu, panel, status bar, navigasi bawah, dan dropdown menjadi **kaca abu-abu tembus pandang** (efek blur / frosted glass).
 - Warna tema bilah status HP (`theme-color`) & layar pembuka (manifest) diubah ke abu-abu `#3a3f47`.
 - Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v39). Backend tidak berubah.
+
+## Pembaruan v9.0 — latar abu-abu gelap
+
+- Latar aplikasi & layar login: **abu-abu gelap** (`#25282d` → `#1a1c20`), foto plant hanya samar di belakang.
+- Panel tetap berefek kaca, kini dengan nada abu-abu gelap; status bar & navigasi bawah lebih pekat.
+- `theme-color` & warna layar pembuka (manifest): `#25282d`.
+- Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v40).
