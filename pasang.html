@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pasang FirstAid SASU3B</title>
-<meta name="description" content="Pasang aplikasi FirstAid SASU3B (stok kotak P3K SR Asam Sulfat & Utilitas 3B) di layar utama Android, iPhone, atau komputer.">
+<title>Pasang FASTER P3K</title>
+<meta name="description" content="Pasang aplikasi FASTER P3K (stok kotak P3K SR Asam Sulfat & Utilitas 3B) di layar utama Android, iPhone, atau komputer.">
 <meta name="theme-color" content="#0d0f12">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="FirstAid SASU3B">
+<meta name="apple-mobile-web-app-title" content="FASTER P3K">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,10 +67,10 @@
 <body>
 <main>
   <section class="hero">
-    <img src="./icon-512.png?v=14" alt="Ikon FirstAid SASU3B">
+    <img src="./icon-512.png?v=14" alt="Ikon FASTER P3K">
     <div>
       <div class="k eyebrow">Aplikasi stok kotak P3K</div>
-      <h1>FirstAid<br>SASU3B</h1>
+      <h1>FASTER<br>P3K</h1>
       <p>SR Asam Sulfat &amp; Utilitas 3B</p>
     </div>
   </section>
@@ -104,7 +104,7 @@
       <li><span>Buka halaman ini di <b>Google Chrome</b>.</span></li>
       <li><span>Ketuk tombol <b>Pasang aplikasi</b> di atas — atau menu <b>⋮</b> di kanan atas.</span><svg width="20" height="20" viewBox="0 0 24 24" fill="#eceef2"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></li>
       <li><span>Pilih <b>Instal aplikasi</b> / <b>Tambahkan ke layar utama</b>, lalu <b>Instal</b>.</span></li>
-      <li><span>Ikon <b>FirstAid SASU3B</b> muncul di layar utama &amp; laci aplikasi.</span></li>
+      <li><span>Ikon <b>FASTER P3K</b> muncul di layar utama &amp; laci aplikasi.</span></li>
     </ol>
   </div>
 
@@ -114,7 +114,7 @@
       <li><span>Buka halaman ini di <b>Safari</b> (bukan Chrome atau WhatsApp).</span></li>
       <li><span>Ketuk tombol <b>Bagikan</b> di bilah bawah.</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#eceef2" stroke-width="1.7"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/></svg></li>
       <li><span>Gulir, pilih <b>Tambahkan ke Layar Utama</b>.</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#eceef2" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg></li>
-      <li><span>Ketuk <b>Tambah</b> — ikon <b>FirstAid SASU3B</b> muncul di layar utama.</span></li>
+      <li><span>Ketuk <b>Tambah</b> — ikon <b>FASTER P3K</b> muncul di layar utama.</span></li>
     </ol>
   </div>
 
@@ -203,17 +203,17 @@
     deferred.prompt();
     deferred.userChoice.then(function (c) {
       deferred = null; $('btnInstal').classList.add('hidden');
-      if (c.outcome === 'accepted') status('Memasang…', 'Ikon FirstAid SASU3B akan muncul di layar utama.', 'var(--ok)');
+      if (c.outcome === 'accepted') status('Memasang…', 'Ikon FASTER P3K akan muncul di layar utama.', 'var(--ok)');
       else { status('Pemasangan dibatalkan', 'Bisa dicoba lagi lewat menu ⋮ → Instal aplikasi.', '#d8a54a'); $('btnBuka').classList.remove('hidden'); }
     });
   });
   window.addEventListener('appinstalled', function () {
-    status('Aplikasi terpasang', 'Buka FirstAid SASU3B dari layar utama.', 'var(--ok)');
+    status('Aplikasi terpasang', 'Buka FASTER P3K dari layar utama.', 'var(--ok)');
     $('btnInstal').classList.add('hidden'); $('btnBuka').classList.remove('hidden');
   });
 
   $('btnBagikan').addEventListener('click', function () {
-    var data = { title: 'FirstAid SASU3B', text: 'Pasang aplikasi stok kotak P3K SASU3B:', url: pasangUrl };
+    var data = { title: 'FASTER P3K', text: 'Pasang aplikasi stok kotak P3K SASU3B:', url: pasangUrl };
     if (navigator.share) { navigator.share(data).catch(function () {}); return; }
     var done = function () { $('lblBagikan').textContent = 'Link disalin'; setTimeout(function () { $('lblBagikan').textContent = 'Bagikan link pemasangan'; }, 2000); };
     if (navigator.clipboard) navigator.clipboard.writeText(pasangUrl).then(done, function () { prompt('Salin link:', pasangUrl); });

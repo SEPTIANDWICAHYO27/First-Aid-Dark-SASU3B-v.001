@@ -1,4 +1,4 @@
-# FirstAid SASU3B — aplikasi stok kotak P3K
+# FASTER P3K — aplikasi stok kotak P3K
 
 ## 📲 Pasang sebagai aplikasi (Android, iPhone, komputer)
 
@@ -249,3 +249,12 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Dropdown **Tahun** hanya berisi angka tahun (mis. `2027`, `2026`), tanpa teks status di samping.
 - Tombol **+ Tambah tahun** (Admin & Approver) dipindah keluar dropdown, ada di Profil → Periode tahun data.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v37).
+
+## Pembaruan v8.8 — nama aplikasi FASTER P3K
+
+- Nama aplikasi menjadi **FASTER P3K** di layar login, judul tab, nama ikon di layar utama (manifest),
+  notifikasi HP, halaman `pasang.html`, dan dokumen PDF.
+- `id` manifest tidak diubah, jadi aplikasi yang sudah terpasang ikut diperbarui (tidak perlu pasang ulang;
+  nama di bawah ikon bisa baru berganti setelah beberapa waktu atau setelah dipasang ulang).
+- Backend (`Code.gs`) tidak perlu diubah.
+- Berkas yang diubah: `index.html`, `manifest.webmanifest`, `pasang.html`, `pdfdoc.js`, `notif.js`, `config.js`, `sw.js` (cache v38).

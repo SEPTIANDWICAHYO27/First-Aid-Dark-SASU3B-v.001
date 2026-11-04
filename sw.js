@@ -1,7 +1,7 @@
-/* FirstAid SASU3B — service worker
+/* FASTER P3K — service worker
    App shell cache-first, data Google Sheets network-first dengan fallback cache
    supaya aplikasi tetap terbaca di area plant tanpa sinyal. */
-const SHELL = 'fa-sasu3b-shell-v37';
+const SHELL = 'fa-sasu3b-shell-v38';
 const DATA = 'fa-sasu3b-data-v6';
 try { importScripts('./notif.js'); } catch (e) {}
 const META = 'fa-sasu3b-meta';   // catatan notifikasi (dipakai notif.js) — jangan dihapus saat activate
@@ -64,7 +64,7 @@ self.addEventListener('fetch', e => {
 // Sinkronisasi tertunda: stok opname yang diisi offline dikirim saat online kembali.
 self.addEventListener('sync', e => {
   if (e.tag === 'kirim-opname') {
-    e.waitUntil(self.registration.showNotification('FirstAid SASU3B', {
+    e.waitUntil(self.registration.showNotification('FASTER P3K', {
       body: 'Stok opname offline berhasil dikirim ke Google Sheets.',
       icon: './icon-192.png'
     }));

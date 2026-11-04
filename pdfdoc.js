@@ -1,4 +1,4 @@
-/* FirstAid SASU3B — pembuat PDF "Dokumen Permintaan Stok P3K".
+/* FASTER P3K — pembuat PDF "Dokumen Permintaan Stok P3K".
    Tanpa library luar: PDF ditulis langsung (font standar Helvetica, WinAnsi),
    jadi tetap bisa dibuat saat offline di area plant.
    API: window.FAPdf.permintaan(data) → Promise<Blob> */
@@ -95,7 +95,7 @@
     obj(2, '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + n + ' >>');
     obj(3, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
     obj(4, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
-    obj(5, '<< /Title (' + esc(ansi(judul || 'Dokumen')) + ') /Producer (FirstAid SASU3B) /Creator (FirstAid SASU3B) >>');
+    obj(5, '<< /Title (' + esc(ansi(judul || 'Dokumen')) + ') /Producer (FASTER P3K) /Creator (FASTER P3K) >>');
     off[6] = pos;
     if (img) {
       tulis('6 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + img.w + ' /Height ' + img.h +
@@ -152,7 +152,7 @@
         doc.teks(tx, y + 10, 'DOKUMEN PERMINTAAN STOK P3K', { size: 14, bold: true, color: NAVY });
         doc.teks(tx, y + 24, d.unit || 'SR Asam Sulfat & Utilitas 3B', { size: 9, color: MUT });
         if (perKotak) doc.teks(tx, y + 36, 'KOTAK ' + d.kotak + ' · ' + (d.lokasi || ''), { size: 9, bold: true, color: MERAH });
-        else doc.teks(tx, y + 35, 'Aplikasi FirstAid SASU3B · Manajemen & inventaris stok P3K', { size: 8, color: MUT });
+        else doc.teks(tx, y + 35, 'Aplikasi FASTER P3K · Manajemen & inventaris stok P3K', { size: 8, color: MUT });
         doc.teks(PW - M, y + 10, 'No. ' + d.nomor, { size: 9, bold: true, align: 'right', color: NAVY });
         doc.teks(PW - M, y + 24, d.tanggal, { size: 9, align: 'right', color: MUT });
         if (lanjutan) doc.teks(PW - M, y + 35, '(lanjutan)', { size: 8, align: 'right', color: MUT });
@@ -295,7 +295,7 @@
     doc.hal.forEach(function (pg, i) {
       doc.cur = pg;
       doc.garis(M, PH - M + 6, PW - M, PH - M + 6, { color: GARIS, lw: 0.4 });
-      doc.teks(M, PH - M + 17, 'Dibuat otomatis oleh FirstAid SASU3B · ' + dibuat, { size: 7, color: MUT });
+      doc.teks(M, PH - M + 17, 'Dibuat otomatis oleh FASTER P3K · ' + dibuat, { size: 7, color: MUT });
       doc.teks(PW - M, PH - M + 17, 'Halaman ' + (i + 1) + ' / ' + n, { size: 7, color: MUT, align: 'right' });
     });
   }

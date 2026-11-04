@@ -1,4 +1,4 @@
-/* FirstAid SASU3B — notifikasi HP (dipakai index.html dan sw.js).
+/* FASTER P3K — notifikasi HP (dipakai index.html dan sw.js).
    Notifikasi lokal lewat service worker: tidak butuh server push.
    - Aplikasi memeriksa tiap kali data ditarik (buka, kembali ke aplikasi, tiap 5 menit).
    - Android (aplikasi terpasang, Chrome): service worker juga memeriksa pengajuan secara

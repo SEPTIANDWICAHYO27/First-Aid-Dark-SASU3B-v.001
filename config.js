@@ -1,4 +1,4 @@
-/* FirstAid SASU3B — konfigurasi database Google Sheets.
+/* FASTER P3K — konfigurasi database Google Sheets.
    Satu-satunya tempat mengganti spreadsheet atau backend.
    Setelah diubah: unggah ulang config.js saja (tidak perlu build ulang index.html). */
 window.FA_CONFIG = {
