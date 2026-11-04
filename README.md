@@ -299,3 +299,9 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Warna aksen diganti dari Sky Blue `#0284C7` ke **LightSlateGray `#778899`** (tombol, pilihan aktif, tautan, grafik).
 - Warna lain tetap: latar `#F0F4F8`, kartu `#FFFFFF`, teks `#1E293B`, garis `#E2E8F0`.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v43).
+
+## Pembaruan v9.4 — aksen MidnightBlue
+
+- Warna aksen diganti ke **MidnightBlue `#191970`** (tombol, pilihan aktif, tautan, grafik).
+- Warna lain tetap: latar `#F0F4F8`, kartu `#FFFFFF`, teks `#1E293B`, garis `#E2E8F0`.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v44).
