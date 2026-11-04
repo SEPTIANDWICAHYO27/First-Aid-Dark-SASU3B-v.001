@@ -258,3 +258,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
   nama di bawah ikon bisa baru berganti setelah beberapa waktu atau setelah dipasang ulang).
 - Backend (`Code.gs`) tidak perlu diubah.
 - Berkas yang diubah: `index.html`, `manifest.webmanifest`, `pasang.html`, `pdfdoc.js`, `notif.js`, `config.js`, `sw.js` (cache v38).
+
+## Pembaruan v8.9 — latar kaca transparan abu-abu
+
+- Latar aplikasi: foto plant dengan lapisan gradasi **abu-abu** (terang di atas → gelap di bawah), termasuk layar login.
+- Kartu, panel, status bar, navigasi bawah, dan dropdown menjadi **kaca abu-abu tembus pandang** (efek blur / frosted glass).
+- Warna tema bilah status HP (`theme-color`) & layar pembuka (manifest) diubah ke abu-abu `#3a3f47`.
+- Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v39). Backend tidak berubah.
