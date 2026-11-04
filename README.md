@@ -227,3 +227,12 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
   antaranya ikut dibuat berurutan; dicatat di Log. `Config.gs`: `TAHUN_MAKS_DEPAN: 5`.
   Dari editor: `P3K_tambahTahunBerikutnya()`.
   **Wajib:** tempel `Code.gs` & `Config.gs` terbaru → Deploy → Manage deployments → Edit → New version.
+
+## Pembaruan v8.5 — menu Periode tahun di Profil
+
+- **Profil → Periode tahun data**: daftar semua tab tahun (mis. 2027, 2026) dengan status
+  *Tahun berjalan · opname bisa diisi*, *Arsip · hanya baca*, atau *Tahun depan · disiapkan*, beserta nama tab sheet-nya.
+  Ketuk tahun untuk memilih; pilihan berlaku untuk Beranda, Kotak, Riwayat, dan Dokumen.
+- Saat melihat tahun lain, muncul tombol **Kembali ke tahun berjalan**.
+- **Admin & Approver**: tombol **+ Tambah tahun berikutnya di Google Sheets** (memakai aksi `tahun_baru` yang sudah ada).
+- Berkas yang diubah: `index.html`, `sw.js` (cache v35). Backend tidak berubah.
