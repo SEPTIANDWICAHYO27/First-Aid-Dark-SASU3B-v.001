@@ -236,3 +236,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Saat melihat tahun lain, muncul tombol **Kembali ke tahun berjalan**.
 - **Admin & Approver**: tombol **+ Tambah tahun berikutnya di Google Sheets** (memakai aksi `tahun_baru` yang sudah ada).
 - Berkas yang diubah: `index.html`, `sw.js` (cache v35). Backend tidak berubah.
+
+## Pembaruan v8.6 — opsi tahun berbentuk enum (dropdown)
+
+- Baris **Tahun** di Beranda, Kotak, Riwayat, Dokumen, dan Profil kini berupa **dropdown** berisi
+  daftar tahun beserta statusnya (mis. `2026 — Tahun berjalan`, `2027 — Tahun depan · disiapkan`, `2025 — Arsip · hanya baca`).
+- Admin & Approver: opsi terakhir **+ Tambah tahun 2028 (buat tab sheet)** membuat tab tahun berikutnya.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v36).
