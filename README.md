@@ -243,3 +243,9 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
   daftar tahun beserta statusnya (mis. `2026 — Tahun berjalan`, `2027 — Tahun depan · disiapkan`, `2025 — Arsip · hanya baca`).
 - Admin & Approver: opsi terakhir **+ Tambah tahun 2028 (buat tab sheet)** membuat tab tahun berikutnya.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v36).
+
+## Pembaruan v8.7 — dropdown tahun ringkas
+
+- Dropdown **Tahun** hanya berisi angka tahun (mis. `2027`, `2026`), tanpa teks status di samping.
+- Tombol **+ Tambah tahun** (Admin & Approver) dipindah keluar dropdown, ada di Profil → Periode tahun data.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v37).
