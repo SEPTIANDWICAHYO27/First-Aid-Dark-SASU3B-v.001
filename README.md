@@ -272,3 +272,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Panel tetap berefek kaca, kini dengan nada abu-abu gelap; status bar & navigasi bawah lebih pekat.
 - `theme-color` & warna layar pembuka (manifest): `#25282d`.
 - Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v40).
+
+## Pembaruan v9.1 — latar abu-abu
+
+- Latar aplikasi & layar login: **abu-abu** (`#60656d` → `#3e4248`), foto plant samar di belakang; panel tetap berefek kaca.
+- Teks keterangan yang redup dibuat lebih terang agar tetap terbaca di latar abu-abu.
+- `theme-color` & warna layar pembuka (manifest): `#4e5259`.
+- Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v41).
