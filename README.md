@@ -279,3 +279,17 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Teks keterangan yang redup dibuat lebih terang agar tetap terbaca di latar abu-abu.
 - `theme-color` & warna layar pembuka (manifest): `#4e5259`.
 - Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v41).
+
+## Pembaruan v9.2 — tema terang Ice Blue
+
+| Peran | Warna |
+|---|---|
+| Latar utama | `#F0F4F8` (Ice Blue Tint) |
+| Kartu / permukaan | `#FFFFFF` |
+| Teks utama | `#1E293B` · teks sekunder `#64748B` |
+| Aksen | `#0284C7` (Sky Blue) |
+| Garis / pembatas | `#E2E8F0` |
+
+- Warna status disesuaikan agar kontras di latar terang: hijau `#059669`, kuning `#D97706`, merah `#E11D48`, emas `#B45309`.
+- `theme-color` & layar pembuka: `#F0F4F8`; bilah status iPhone `default` (ikon gelap).
+- Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v42). Backend tidak berubah.
