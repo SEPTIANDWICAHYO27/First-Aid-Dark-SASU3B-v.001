@@ -293,3 +293,9 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Warna status disesuaikan agar kontras di latar terang: hijau `#059669`, kuning `#D97706`, merah `#E11D48`, emas `#B45309`.
 - `theme-color` & layar pembuka: `#F0F4F8`; bilah status iPhone `default` (ikon gelap).
 - Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v42). Backend tidak berubah.
+
+## Pembaruan v9.3 — aksen LightSlateGray
+
+- Warna aksen diganti dari Sky Blue `#0284C7` ke **LightSlateGray `#778899`** (tombol, pilihan aktif, tautan, grafik).
+- Warna lain tetap: latar `#F0F4F8`, kartu `#FFFFFF`, teks `#1E293B`, garis `#E2E8F0`.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v43).
