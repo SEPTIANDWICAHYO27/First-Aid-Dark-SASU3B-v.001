@@ -358,3 +358,15 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 
 - Label di atas judul halaman Kotak: "Interactive medical box mapping" → **"FIRST AID KIT BOX MAPPING"**.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v50).
+
+## Pembaruan v9.11 — siap dipasang di Android, iOS, dan PC
+
+- Lolos pemeriksaan kelayakan install Chrome (tanpa error) untuk `index.html` dan `pasang.html`.
+- `pasang.html` (panduan pemasangan): tema futuristik; tab Komputer dilengkapi jalur menu Chrome
+  (⋮ › Transmisikan, simpan, dan bagikan › Instal halaman sebagai aplikasi), Edge (… › Aplikasi › Instal situs ini),
+  dan Mac Safari (File › Tambahkan ke Dock).
+- Layar login: tombol menyesuaikan perangkat — "Pasang aplikasi di HP" / "Pasang aplikasi di komputer".
+- Manifest: gambar pratinjau baru bertema futuristik — 3 layar HP (`narrow`) + 1 layar lebar PC (`wide`, 1280×800)
+  untuk jendela install yang lebih lengkap di Chrome/Edge desktop & Android.
+- Latar di luar bingkai aplikasi (tampilan PC) ikut bercahaya ungu/cyan.
+- Berkas yang diubah: `index.html`, `pasang.html`, `manifest.webmanifest`, `screenshots/*`, `sw.js` (cache v51).
