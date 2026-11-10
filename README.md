@@ -316,3 +316,12 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Tab tahun baru di Google Sheets otomatis muncul di menu (dicek saat dibuka & tiap 5 menit); daftar terakhir
   disimpan di perangkat sehingga menu langsung lengkap saat aplikasi dibuka.
 - Berkas yang diubah: `index.html`, `config.js` (keterangan), `sw.js` (cache v45). Backend tidak perlu diubah.
+
+## Pembaruan v9.6 — tema futuristik (glassmorphism)
+
+- Latar: `#030712` dengan cahaya radial ungu `rgba(127,0,255,.15)` (kiri atas) & cyan `rgba(0,242,254,.12)` (kanan bawah).
+- Kartu: kaca `rgba(255,255,255,.03)`, `backdrop-filter: blur(16px)`, garis `rgba(255,255,255,.08)`, sudut 20px;
+  tombol, isian & dropdown bersudut 12px.
+- Teks & warna status kembali ke palet gelap (teks `#eceef2`, aksen `#5980a6`), karena latar kini gelap.
+- Menu Tahun tetap mengikuti tab database (v9.5).
+- `theme-color` & layar pembuka: `#030712`. Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v46).
