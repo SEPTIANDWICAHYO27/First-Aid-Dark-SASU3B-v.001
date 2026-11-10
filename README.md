@@ -305,3 +305,14 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Warna aksen diganti ke **MidnightBlue `#191970`** (tombol, pilihan aktif, tautan, grafik).
 - Warna lain tetap: latar `#F0F4F8`, kartu `#FFFFFF`, teks `#1E293B`, garis `#E2E8F0`.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v44).
+
+## Pembaruan v9.5 — menu Tahun mengikuti database Google Sheets
+
+- Pilihan **Tahun** kini diambil dari tab yang benar-benar ada di spreadsheet:
+  `Checklist P3K 2026`, `Checklist P3K 2027`, `Checklist P3K 2028`, … (urut seperti di Google Sheets).
+- Setiap tahun membaca tab dengan nama **persis** dari database (sebelumnya tahun 2026 mencari tab `Checklist P3K`).
+- Sumber daftar: backend `?action=tahun` (nama tab asli). Bila backend tidak menjawab, aplikasi memeriksa tab
+  `Checklist P3K <tahun>` langsung dan hanya menampilkan tab yang judulnya cocok "TAHUN yyyy".
+- Tab tahun baru di Google Sheets otomatis muncul di menu (dicek saat dibuka & tiap 5 menit); daftar terakhir
+  disimpan di perangkat sehingga menu langsung lengkap saat aplikasi dibuka.
+- Berkas yang diubah: `index.html`, `config.js` (keterangan), `sw.js` (cache v45). Backend tidak perlu diubah.

@@ -19,10 +19,11 @@ window.FA_CONFIG = {
     PERMINTAAN: "Permintaan"      // permintaan stok dari Daftar belanja (dipakai bila GID.PERMINTAAN kosong)
   },
 
-  // Multi-tahun: tab tahun pertama = SHEETS.CHECKLIST ("Checklist P3K", judul TAHUN 2026);
-  // tahun berikutnya otomatis dibuat backend bernama "Checklist P3K 2027", "Checklist P3K 2028", …
+  // Multi-tahun: menu Tahun di aplikasi mengikuti tab yang ADA di Google Sheets:
+  // "Checklist P3K 2026", "Checklist P3K 2027", "Checklist P3K 2028", … (judul baris atas "TAHUN yyyy").
+  // Tab tahun baru otomatis muncul di menu (dicek tiap 5 menit). Nama dasar tab = SHEETS.CHECKLIST + " " + tahun.
   TAHUN_AWAL: 2026,
-  // Opsional: nama tab khusus per tahun, mis. { 2027: "Checklist 2027" }. Kosongkan bila mengikuti pola.
+  // Opsional: nama tab khusus per tahun bila tidak mengikuti pola, mis. { 2029: "Checklist 2029" }.
   SHEET_TAHUN: {},
 
   // Zona waktu tampilan jam aplikasi. Jam diambil dari server Google Sheets (UTC),
