@@ -353,3 +353,8 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - `apps-script/Code.gs`: `P3K_daftarTahun()` mengutamakan nama tab. Opsional dipasang (Deploy → New version);
   aplikasi sudah benar walau backend belum diperbarui.
 - Berkas yang diubah: `index.html`, `apps-script/Code.gs`, `sw.js` (cache v49).
+
+## Pembaruan v9.10 — label halaman Kotak
+
+- Label di atas judul halaman Kotak: "Interactive medical box mapping" → **"FIRST AID KIT BOX MAPPING"**.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v50).
