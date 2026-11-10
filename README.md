@@ -325,3 +325,12 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Teks & warna status kembali ke palet gelap (teks `#eceef2`, aksen `#5980a6`), karena latar kini gelap.
 - Menu Tahun tetap mengikuti tab database (v9.5).
 - `theme-color` & layar pembuka: `#030712`. Berkas yang diubah: `index.html`, `manifest.webmanifest`, `sw.js` (cache v46).
+
+## Pembaruan v9.7 — aksen neon cyan & ungu
+
+- Aksen utama **cyan neon `#22D3EE`** (tombol Masuk, Simpan, PDF, Setujui, pilihan kotak/bulan/kategori aktif, grafik)
+  dengan teks gelap `#030712` dan efek cahaya (glow).
+- Teks aksen & tautan cyan muda `#67E8F9`; aksen kedua **ungu neon `#A78BFA`** (label atas login, tombol garis
+  "Cara pasang", "Tambah tahun", status arsip).
+- Kolom isian & dropdown menyala cyan saat dipilih.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v47).
