@@ -334,3 +334,11 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
   "Cara pasang", "Tambah tahun", status arsip).
 - Kolom isian & dropdown menyala cyan saat dipilih.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v47).
+
+## Pembaruan v9.8 — angka tahun selalu terlihat di HP
+
+- Masalah: daftar tahun diberi warna teks putih; di banyak HP Android jendela pilihan berlatar putih → angka tak terlihat.
+- Perbaikan: angka tahun ditampilkan sebagai teks di kotak (15px, putih di atas kaca gelap, panah cyan);
+  pemilih bawaan HP dipasang transparan di atasnya dan **tanpa warna khusus**, jadi daftar tahun memakai warna standar HP.
+- Ukuran huruf pemilih 16px agar iPhone tidak memperbesar layar saat diketuk.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v48).
