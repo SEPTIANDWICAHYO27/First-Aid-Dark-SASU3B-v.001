@@ -524,9 +524,12 @@ function P3K_daftarTahun() {
   var out = [];
   P3K_ss().getSheets().forEach(function (sh) {
     if (sh.getName().toLowerCase().indexOf(P3K.SHEET_CHECKLIST.toLowerCase()) !== 0) return;
-    var lc = Math.max(1, Math.min(sh.getLastColumn(), 8)), lr = Math.max(1, Math.min(sh.getLastRow(), 4));
-    var y = P3K_tahunSheet(sh.getRange(1, 1, lr, lc).getDisplayValues());
-    if (!y) { var m = /(\d{4})\s*$/.exec(sh.getName()); y = m ? Number(m[1]) : 0; }
+    // Tahun diambil dari NAMA tab ("Checklist P3K 2027"); judul "TAHUN yyyy" hanya dipakai bila nama tanpa tahun.
+    var m = /(\d{4})\s*$/.exec(sh.getName()), y = m ? Number(m[1]) : 0;
+    if (!y) {
+      var lc = Math.max(1, Math.min(sh.getLastColumn(), 8)), lr = Math.max(1, Math.min(sh.getLastRow(), 4));
+      y = P3K_tahunSheet(sh.getRange(1, 1, lr, lc).getDisplayValues());
+    }
     if (y) out.push({ tahun: y, sheet: sh });
   });
   return out.sort(function (a, b) { return a.tahun - b.tahun; });

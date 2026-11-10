@@ -342,3 +342,14 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
   pemilih bawaan HP dipasang transparan di atasnya dan **tanpa warna khusus**, jadi daftar tahun memakai warna standar HP.
 - Ukuran huruf pemilih 16px agar iPhone tidak memperbesar layar saat diketuk.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v48).
+
+## Pembaruan v9.9 — periode tahun berikutnya selalu tampil
+
+- Menu Tahun selalu memuat **tahun berikutnya** (mis. 2027 saat tahun berjalan 2026), walau tabnya belum dibuat.
+- Tahun sebuah tab kini ditentukan dari **nama tab** (`Checklist P3K 2027`), bukan dari judul "TAHUN yyyy" di dalamnya.
+  Tab hasil salinan yang judulnya masih "TAHUN 2026" tetap terbaca sebagai 2027/2028.
+- Aplikasi memeriksa nama tab langsung di Google Sheets (dibandingkan dengan nama yang pasti tidak ada), lalu
+  menggabungkannya dengan daftar dari backend.
+- `apps-script/Code.gs`: `P3K_daftarTahun()` mengutamakan nama tab. Opsional dipasang (Deploy → New version);
+  aplikasi sudah benar walau backend belum diperbarui.
+- Berkas yang diubah: `index.html`, `apps-script/Code.gs`, `sw.js` (cache v49).
