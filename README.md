@@ -370,3 +370,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
   untuk jendela install yang lebih lengkap di Chrome/Edge desktop & Android.
 - Latar di luar bingkai aplikasi (tampilan PC) ikut bercahaya ungu/cyan.
 - Berkas yang diubah: `index.html`, `pasang.html`, `manifest.webmanifest`, `screenshots/*`, `sw.js` (cache v51).
+
+## Pembaruan v9.12 — tanggal kedaluwarsa tidak wajib
+
+- Kolom **Expired date**, **Tanggal kadaluwarsa**, dan **No. batch** diberi tanda **opsional** (layar Stok opname & Update kadaluwarsa).
+- Keterangan di layar opname: yang wajib hanya jumlah stok & foto kotak; tanggal dan nomor batch boleh dikosongkan bila tidak tercantum di kemasan.
+- Perilaku tetap: opname tersimpan tanpa tanggal; backend hanya menulis kolom Expired Date bila tanggal diisi; status barang tanpa tanggal dinilai dari jumlah stok saja.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v52). Backend tidak berubah.
