@@ -377,3 +377,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Keterangan di layar opname: yang wajib hanya jumlah stok & foto kotak; tanggal dan nomor batch boleh dikosongkan bila tidak tercantum di kemasan.
 - Perilaku tetap: opname tersimpan tanpa tanggal; backend hanya menulis kolom Expired Date bila tanggal diisi; status barang tanpa tanggal dinilai dari jumlah stok saja.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v52). Backend tidak berubah.
+
+## Pembaruan v9.13 — batal isi tanggal kedaluwarsa = kosong
+
+- Tombol **✕ Hapus** di samping judul kolom tanggal (Stok opname & Update kadaluwarsa), muncul bila kolom berisi tanggal. Sekali ketuk, tanggal langsung kosong — termasuk tanggal yang terisi otomatis saat pemilih tanggal HP dibatalkan.
+- Tanggal yang sudah tercatat lalu dihapus ikut **dikosongkan di Sheet**: sel Expired Date bulan berjalan berisi tanda `-`, dan aplikasi tidak lagi mengambil tanggal dari bulan/tahun sebelumnya untuk barang itu.
+- Memilih tanggal lalu menghapusnya kembali (tanpa tanggal tercatat) tidak dihitung sebagai perubahan.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v53), `apps-script/Code.gs` (**perlu Deploy → Manage deployments → Edit → New version**).

@@ -186,13 +186,17 @@ function P3K_checklist(req) {
     var rincian = [];
     rencana.tulis.forEach(function (t) {
       var lama = String((values[t.baris - 1] || [])[t.kolom - 1] || '').trim();
-      var baru = t.jenis === 'exp' ? P3K_tglTampil(t.nilai) : String(t.nilai);
+      var baru = t.hapus ? '-' : t.jenis === 'exp' ? P3K_tglTampil(t.nilai) : String(t.nilai);
       if (lama !== baru) rincian.push({ n: String((values[t.baris - 1] || [])[4] || '').trim(), j: t.jenis, l: lama, b: baru });
     });
 
     rencana.tulis.forEach(function (t) {
       var sel = sh.getRange(t.baris, t.kolom);
-      if (t.jenis === 'exp') {
+      if (t.hapus) {
+        // Penanda "dikosongkan": nilai tanggal 1/1/1900 bertampilan "-". Tetap bertipe tanggal agar
+        // tidak dibuang gviz, dan mencegah aplikasi mewarisi tanggal bulan sebelumnya.
+        sel.setValue(new Date(1900, 0, 1)).setNumberFormat('"-"');
+      } else if (t.jenis === 'exp') {
         var p = String(t.nilai).split('-');     // yyyy-mm-dd dari input tanggal
         sel.setValue(new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]))).setNumberFormat('dd/mm/yyyy');
       } else {
@@ -269,7 +273,9 @@ function P3K_rencanaTulis(values, boxId, bulan, rows) {
     if (!baris) { tidakDikenal.push(it.nama || it.item_id); return; }
     if (it.qty !== null && it.qty !== undefined && it.qty !== '' && isFinite(Number(it.qty)))
       tulis.push({ baris: baris, kolom: kolomQty, jenis: 'qty', nilai: Number(it.qty) });
-    if (it.exp_date && /^\d{4}-\d{2}-\d{2}$/.test(String(it.exp_date)))
+    if (it.exp_hapus === true)            // PIC mengosongkan tanggal kedaluwarsa
+      tulis.push({ baris: baris, kolom: kolomExp, jenis: 'exp', nilai: '', hapus: true });
+    else if (it.exp_date && /^\d{4}-\d{2}-\d{2}$/.test(String(it.exp_date)))
       tulis.push({ baris: baris, kolom: kolomExp, jenis: 'exp', nilai: String(it.exp_date) });
   });
   return { tulis: tulis, tidakDikenal: tidakDikenal, barisKotak: mulai + 1,
