@@ -1,7 +1,7 @@
 /* FASTER P3K — service worker
-   App shell cache-first, data Google Sheets network-first dengan fallback cache
+   Halaman aplikasi network-first (update langsung terasa), aset cache-first, data Google Sheets network-first dengan fallback cache
    supaya aplikasi tetap terbaca di area plant tanpa sinyal. */
-const SHELL = 'fa-sasu3b-shell-v54';
+const SHELL = 'fa-sasu3b-shell-v55';
 const DATA = 'fa-sasu3b-data-v6';
 try { importScripts('./notif.js'); } catch (e) {}
 const META = 'fa-sasu3b-meta';   // catatan notifikasi (dipakai notif.js) — jangan dihapus saat activate
@@ -14,7 +14,7 @@ const SHELL_FILES = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(SHELL)
-      .then(c => Promise.allSettled(SHELL_FILES.map(f => c.add(f))))
+      .then(c => Promise.allSettled(SHELL_FILES.map(f => c.add(new Request(f, { cache: 'reload' })))))
       .then(() => self.skipWaiting())
   );
 });
@@ -49,7 +49,28 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // App shell & aset: cache-first, isi cache saat pertama diakses.
+  // Halaman aplikasi (index.html / navigasi) & config.js: network-first dengan batas 4 detik,
+  // supaya versi baru dari GitHub langsung terpakai; offline / sinyal lemah → salinan cache.
+  const u = new URL(req.url);
+  const halaman = req.mode === 'navigate' || /\/(index\.html|config\.js|sw\.js)?$/.test(u.pathname);
+  if (halaman && u.origin === self.location.origin) {
+    e.respondWith(new Promise(selesai => {
+      let beres = false;
+      const dariCache = () => caches.match(req, { ignoreSearch: true })
+        .then(hit => hit || caches.match('./index.html'));
+      const jeda = setTimeout(() => dariCache().then(hit => { if (hit && !beres) { beres = true; selesai(hit); } }), 4000);
+      fetch(new Request(req, { cache: 'no-cache' })).then(res => {
+        if (res.ok && res.type === 'basic') {
+          const copy = res.clone();
+          caches.open(SHELL).then(c => c.put(req, copy));
+        }
+        if (!beres) { beres = true; clearTimeout(jeda); selesai(res); }
+      }).catch(() => dariCache().then(hit => { if (!beres) { beres = true; clearTimeout(jeda); selesai(hit || Response.error()); } }));
+    }));
+    return;
+  }
+
+  // Aset lain (ikon, font, pdfdoc.js…): cache-first, isi cache saat pertama diakses.
   e.respondWith(
     caches.match(req).then(hit => hit || fetch(req).then(res => {
       if (res.ok && res.type === 'basic') {

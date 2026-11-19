@@ -391,3 +391,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Kini kartu Approval selalu tampil untuk peran **Admin** dan **Approver**, dipindah ke atas tepat di bawah banner checklist, dengan jumlah pengajuan menunggu di sisi kanan. Akun berperan User tetap tidak melihatnya.
 - Peran dibaca dari kolom **Role** tab User dan harus tertulis `Admin` atau `Approver` (huruf besar/kecil bebas).
 - Berkas yang diubah: `index.html`, `sw.js` (cache v54).
+
+## Pembaruan v9.15 — update aplikasi langsung terambil di HP
+
+- Sebelumnya halaman aplikasi disajikan *cache-first* dan, saat service worker baru dipasang, `index.html` bisa terambil dari cache HTTP GitHub Pages (±10 menit). Akibatnya HP bisa tetap menjalankan versi lama (mis. menu Approval belum muncul) walau repo sudah diperbarui.
+- Kini `index.html`/navigasi dan `config.js` diambil **network-first** (batas 4 detik, lalu jatuh ke cache bila sinyal lemah/offline), cache awal diisi dengan `cache: 'reload'`, `sw.js` didaftarkan dengan `updateViaCache: 'none'` dan dicek ulang setiap aplikasi kembali dibuka. Bila versi baru aktif, halaman dimuat ulang sekali secara otomatis.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v55).
+- HP yang masih memakai versi lama: buka aplikasi, tunggu ±10 detik, tutup penuh (geser dari daftar aplikasi terbaru), lalu buka lagi. Setelah itu update berikutnya terambil otomatis.
