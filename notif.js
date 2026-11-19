@@ -39,7 +39,7 @@
              sekarang: Date}  → daftar notifikasi baru; yang sudah dikirim dicatat. */
   function nilai(ctx, mem) {
     var out = [], sent = mem.sent || (mem.sent = {}), now = ctx.sekarang || new Date(), t = now.getTime();
-    var approver = /^(admin|approver)$/i.test(String(ctx.peran || '').trim());
+    var approver = /(^|[^a-z])(admin|approver|approval|penyetuju)([^a-z]|$)/i.test(String(ctx.peran || '').trim());
     var nik = String(ctx.nik || '').replace(/\D/g, '');
     var A = ctx.approvals || [];
     var awal = !mem.awal || mem.awal[nik] === undefined;      // pertama kali aktif: jangan banjiri keputusan lama

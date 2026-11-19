@@ -336,9 +336,17 @@ function P3K_catatPengajuan(p) {
   return id;
 }
 
+/** Peran berhak menyetujui bila memuat kata Admin / Approver (atau isi Config PERAN_APPROVER) di mana pun,
+ *  mis. "Admin", "Approver", "Admin (Approver)", "Approver 1". Kata dibandingkan utuh, tanpa beda huruf besar/kecil. */
+function P3K_peranApprover(peran) {
+  var daftar = (P3K.PERAN_APPROVER || ['Admin', 'Approver']).concat(['admin', 'approver', 'approval', 'penyetuju'])
+    .map(function (x) { return String(x).trim().toLowerCase(); });
+  var kata = String(peran || '').toLowerCase().split(/[^a-z0-9]+/).filter(String);
+  var utuh = String(peran || '').trim().toLowerCase();
+  return daftar.indexOf(utuh) >= 0 || kata.some(function (k) { return daftar.indexOf(k) >= 0; });
+}
 function P3K_bolehMenyetujui(user) {
-  var daftar = (P3K.PERAN_APPROVER || ['Admin', 'Approver']).map(function (x) { return String(x).toLowerCase(); });
-  return !!user && daftar.indexOf(String(user.peran || '').trim().toLowerCase()) >= 0;
+  return !!user && P3K_peranApprover(user.peran);
 }
 
 /* ───────────── Permintaan stok (dari Daftar belanja) ───────────── */
@@ -499,7 +507,7 @@ function P3K_ujiApproval() {
   ok(!!shU, shU ? 'Tab ' + P3K.SHEET_USER + ' ditemukan' : 'Tab ' + P3K.SHEET_USER + ' TIDAK ditemukan');
   if (shU) {
     var v = shU.getDataRange().getDisplayValues(), peran = (P3K.PERAN_APPROVER || ['Admin', 'Approver']).map(function (x) { return x.toLowerCase(); });
-    var akun = v.slice(1).filter(function (r) { return peran.indexOf(String(r[4] || '').trim().toLowerCase()) >= 0; })
+    var akun = v.slice(1).filter(function (r) { return P3K_peranApprover(r[4]); })
       .map(function (r) { return String(r[3] || '').trim() + ' (' + String(r[4]).trim() + ')'; });
     ok(akun.length > 0, akun.length ? 'Akun yang bisa meninjau: ' + akun.join(', ') : 'Tidak ada akun berperan ' + (P3K.PERAN_APPROVER || []).join('/') + ' di kolom Role tab ' + P3K.SHEET_USER);
   }

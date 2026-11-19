@@ -405,3 +405,9 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Akun Admin/Approver mendapat tombol **Approval** kedua di Profil (selain kartu di Beranda), lengkap dengan jumlah pengajuan menunggu.
 - Akun berperan User melihat keterangan bahwa menu Approval khusus Admin/Approver, beserta peran akunnya saat ini.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v56).
+
+## Pembaruan v9.17 — peran "Admin (Approver)" dikenali sebagai approver
+
+- Sebelumnya peran harus tertulis persis `Admin` atau `Approver`. Isi seperti **`Admin (Approver)`**, `Approver 1`, atau `Penyetuju` dianggap User, sehingga menu & halaman Approval tidak muncul dan backend menolak keputusan.
+- Kini aplikasi (`index.html`, `notif.js`) dan backend (`Code.gs`, fungsi `P3K_peranApprover`) mengenali kata utuh **Admin / Approver / Approval / Penyetuju** di mana pun dalam kolom Role (huruf besar/kecil bebas). "Administrasi" tidak ikut terhitung.
+- Berkas yang diubah: `index.html` (versi 9.17), `notif.js`, `sw.js` (cache v57), `apps-script/Code.gs` (**perlu Deploy → Manage deployments → Edit → New version**).
