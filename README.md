@@ -398,3 +398,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Kini `index.html`/navigasi dan `config.js` diambil **network-first** (batas 4 detik, lalu jatuh ke cache bila sinyal lemah/offline), cache awal diisi dengan `cache: 'reload'`, `sw.js` didaftarkan dengan `updateViaCache: 'none'` dan dicek ulang setiap aplikasi kembali dibuka. Bila versi baru aktif, halaman dimuat ulang sekali secara otomatis.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v55).
 - HP yang masih memakai versi lama: buka aplikasi, tunggu ±10 detik, tutup penuh (geser dari daftar aplikasi terbaru), lalu buka lagi. Setelah itu update berikutnya terambil otomatis.
+
+## Pembaruan v9.16 — versi & peran terlihat di Profil
+
+- Profil menampilkan **Versi aplikasi 9.16** di bawah NIK · peran, untuk memastikan HP sudah memuat versi terbaru.
+- Akun Admin/Approver mendapat tombol **Approval** kedua di Profil (selain kartu di Beranda), lengkap dengan jumlah pengajuan menunggu.
+- Akun berperan User melihat keterangan bahwa menu Approval khusus Admin/Approver, beserta peran akunnya saat ini.
+- Berkas yang diubah: `index.html`, `sw.js` (cache v56).

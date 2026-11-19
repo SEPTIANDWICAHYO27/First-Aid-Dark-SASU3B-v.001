@@ -1,7 +1,7 @@
 /* FASTER P3K — service worker
    Halaman aplikasi network-first (update langsung terasa), aset cache-first, data Google Sheets network-first dengan fallback cache
    supaya aplikasi tetap terbaca di area plant tanpa sinyal. */
-const SHELL = 'fa-sasu3b-shell-v55';
+const SHELL = 'fa-sasu3b-shell-v56';
 const DATA = 'fa-sasu3b-data-v6';
 try { importScripts('./notif.js'); } catch (e) {}
 const META = 'fa-sasu3b-meta';   // catatan notifikasi (dipakai notif.js) — jangan dihapus saat activate
