@@ -384,3 +384,10 @@ dicabut; ikon kaca bening & notifikasi v7.9 tetap. Riwayat versi tersebut tetap 
 - Tanggal yang sudah tercatat lalu dihapus ikut **dikosongkan di Sheet**: sel Expired Date bulan berjalan berisi tanda `-`, dan aplikasi tidak lagi mengambil tanggal dari bulan/tahun sebelumnya untuk barang itu.
 - Memilih tanggal lalu menghapusnya kembali (tanpa tanggal tercatat) tidak dihitung sebagai perubahan.
 - Berkas yang diubah: `index.html`, `sw.js` (cache v53), `apps-script/Code.gs` (**perlu Deploy → Manage deployments → Edit → New version**).
+
+## Pembaruan v9.14 — menu Approval selalu tampil untuk Admin & Approver
+
+- Sebelumnya kartu **Approval** di Beranda hanya muncul bila ada pengajuan *Menunggu*, sehingga approver tidak bisa membuka halaman Approval (termasuk riwayat Disetujui/Ditolak) saat antrean kosong.
+- Kini kartu Approval selalu tampil untuk peran **Admin** dan **Approver**, dipindah ke atas tepat di bawah banner checklist, dengan jumlah pengajuan menunggu di sisi kanan. Akun berperan User tetap tidak melihatnya.
+- Peran dibaca dari kolom **Role** tab User dan harus tertulis `Admin` atau `Approver` (huruf besar/kecil bebas).
+- Berkas yang diubah: `index.html`, `sw.js` (cache v54).
